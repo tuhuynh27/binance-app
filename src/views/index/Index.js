@@ -43,6 +43,18 @@ function buildInitialData(listCoin = []) {
   }))
 }
 
+const persistence = {
+  get() {
+    const listCoinStr = localStorage.getItem('binance_listCoin')
+    if (!listCoinStr) return ['BTC', 'ETC']
+    return JSON.parse(listCoinStr)
+  },
+  set(listCoin) {
+    const listCoinStr = JSON.stringify(listCoin)
+    localStorage.setItem('binance_listCoin', listCoinStr)
+  }
+}
+
 function Index() {
   const columns = [
     {
@@ -65,7 +77,7 @@ function Index() {
     },
   ]
 
-  const [listCoin, setListCoin] = useState(['BTC', 'ETH', 'SHIB'])
+  const [listCoin, setListCoin] = useState(persistence.get())
   const initialData = buildInitialData(listCoin)
   const [state, dispatch] = useReducer(reducer, initialData)
   const [isAdding, setIsAdding] = useState(false)
@@ -95,6 +107,7 @@ function Index() {
       ...state,
       newPair
     ])
+    persistence.set([...listCoin, newPair])
     setNewPair('')
     setIsAdding(state => !state)
   }
@@ -102,6 +115,7 @@ function Index() {
   function handleDelete(stream) {
     setListCoin(state => state.filter(e => e !== stream))
     dispatch({ type: 'delete', payload: { pair: stream } })
+    persistence.set(listCoin.filter(e => e !== stream))
   }
 
   return (
