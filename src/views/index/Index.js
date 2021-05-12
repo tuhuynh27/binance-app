@@ -1,7 +1,9 @@
 import React, { useState, useReducer, useEffect } from 'react'
 
-import { Button, Input, Table } from 'antd'
+import { Button, Input, Table, Divider, List, Modal } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
+
+import { usePersistence } from 'utils/persistence'
 
 function reducer(state, action) {
   switch(action.type) {
@@ -35,27 +37,18 @@ function reducer(state, action) {
   }
 }
 
-function buildInitialData(listCoin = []) {
-  return listCoin.map(e => ({
+function buildInitialData(listWatch = []) {
+  return listWatch.map(e => ({
     stream: `${e.toLowerCase()}usdt@aggTrade`,
     pair: e,
     price: 0
   }))
 }
 
-const persistence = {
-  get() {
-    const listCoinStr = localStorage.getItem('binance_listCoin')
-    if (!listCoinStr) return ['BTC', 'ETC']
-    return JSON.parse(listCoinStr)
-  },
-  set(listCoin) {
-    const listCoinStr = JSON.stringify(listCoin)
-    localStorage.setItem('binance_listCoin', listCoinStr)
-  }
-}
-
 function Index() {
+  const watchStore = usePersistence('binance_listWatch')
+  const holdStore = usePersistence('binance_listHold')
+
   const columns = [
     {
       title: 'Pair',
@@ -69,23 +62,50 @@ function Index() {
       key: 'price',
     },
     {
+      title: 'PNL (%)',
+      render: (_, record) => {
+        const picked = listHold.find(e => e.pair === record.pair)
+        if (picked) {
+          return (
+            <span>{(record.price / picked.price * 100 - 100).toFixed(2)}%</span>
+          )
+        }
+      }
+    },
+    {
+      title: 'PNL ($)',
+      render: (_, record) => {
+        const picked = listHold.find(e => e.pair === record.pair)
+        if (picked) {
+          return (
+            <span>{((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}</span>
+          )
+        }
+      }
+    },
+    {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Button onClick={() => handleDelete(record.pair)} icon={<DeleteOutlined />} />
       ),
-    },
+    }
   ]
 
-  const [listCoin, setListCoin] = useState(persistence.get())
-  const initialData = buildInitialData(listCoin)
-  const [state, dispatch] = useReducer(reducer, initialData)
+  const [listWatch, setListWatch] = useState(watchStore.get() || ['BTC', 'ETH'])
+  const initialData = buildInitialData(listWatch)
+  const [state, dispatch] = useReducer(reducer, initialData, undefined)
   const [isAdding, setIsAdding] = useState(false)
-  const [newPair, setNewPair] = useState('')
+  const [newPair, setNewPair] = useState(null)
+  const [listHold, setListHold] = useState(holdStore.get() || [])
+  const [isHoldAdding, setIsHoldAdding] = useState(false)
+  const [holdPair, setHoldPair] = useState(null)
+  const [holdPrice, setHoldPrice] = useState(null)
+  const [holdAmount, setHoldAmount] = useState(null)
 
   useEffect(() => {
-    const listCoinStream = listCoin.map(e =>`${e.toLowerCase()}usdt@aggTrade`)
-    const connectStr = listCoinStream.join('/')
+    const listWatchStream = listWatch.map(e =>`${e.toLowerCase()}usdt@aggTrade`)
+    const connectStr = listWatchStream.join('/')
     const socket = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + connectStr)
     function updateRealtime(e) {
       const payload = JSON.parse(e.data)
@@ -96,37 +116,68 @@ function Index() {
     return () => {
       socket.removeEventListener('message', updateRealtime)
     }
-  }, [listCoin, dispatch])
-
-  function handleChange(e) {
-    setNewPair(e.target.value)
-  }
+  }, [listWatch, dispatch])
 
   function handleAdd() {
-    setListCoin(state => [
+    setListWatch(state => [
       ...state,
-      newPair
+      newPair.toUpperCase()
     ])
-    persistence.set([...listCoin, newPair])
-    setNewPair('')
+    watchStore.set([...listWatch, newPair.toUpperCase()])
+    setNewPair(null)
     setIsAdding(state => !state)
   }
 
   function handleDelete(stream) {
-    setListCoin(state => state.filter(e => e !== stream))
+    setListWatch(state => state.filter(e => e !== stream))
     dispatch({ type: 'delete', payload: { pair: stream } })
-    persistence.set(listCoin.filter(e => e !== stream))
+    watchStore.set(listWatch.filter(e => e !== stream))
+  }
+
+  function handleAddHold() {
+    const newHold = {
+      pair: holdPair.toUpperCase(),
+      price: holdPrice,
+      amount: holdAmount
+    }
+    setListHold(state => [
+      ...state,
+      newHold
+    ])
+    holdStore.set([...listHold, newHold])
+    setHoldPair(null)
+    setHoldPrice(null)
+    setHoldAmount(null)
+    setIsHoldAdding(false)
+  }
+
+  function handleDeleteHold(pair) {
+    setListHold(state => state.filter(e => e.pair !== pair))
+    holdStore.set(listHold.filter(e => e.pair !== pair))
   }
 
   return (
-    <React.Fragment>
-      <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-        <h2 style={{ marginBottom: '10px' }}>Watch List</h2>
-        <Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}} style={{ marginBottom: '10px' }}>{ isAdding ? 'Cancel' : 'Add'}</Button>
-        {isAdding && <Input value={newPair} onChange={handleChange} onPressEnter={handleAdd} placeholder="Enter to add" style={{ marginBottom: '10px' }}/>}
-        <Table size="middle" rowKey="stream" columns={columns} dataSource={state} />
-      </div>
-    </React.Fragment>
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <h2>Watch List</h2>
+      <p><Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>{ isAdding ? 'Cancel' : 'Add'}</Button></p>
+      {isAdding && <p><Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAdd} placeholder="Enter to add"/></p>}
+      <Table size="middle" rowKey="stream" columns={columns} dataSource={state} />
+      <Divider dashed={true} />
+      <h2>Hold List</h2>
+      <p><Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button></p>
+      <List
+        size="small"
+        bordered
+        dataSource={listHold}
+        renderItem={item => <List.Item>Holding {item.amount} {item.pair} at {item.price} USDT <Button size="small" onClick={() => handleDeleteHold(item.pair)}>Sold</Button></List.Item>}
+      />
+      <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
+        {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
+        <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)"/></p>
+        <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price"/></p>
+        <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount"/></p>
+      </Modal>
+    </div>
   )
 }
 
