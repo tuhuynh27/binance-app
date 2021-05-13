@@ -5,8 +5,9 @@ import WatchTable from './WatchTable/WatchTable'
 import HoldTable from './HoldTable/HoldTable'
 
 import { Button, Input, Divider, Modal } from 'antd'
+import { ShareAltOutlined } from '@ant-design/icons'
 
-import { makeHashParams } from 'utils/hashParams'
+import { makeHashParams, isUsingHash } from 'utils/hashParams'
 
 import { useSelector } from 'react-redux'
 import { selectListWatch } from './WatchTable/watchListSlice'
@@ -33,10 +34,18 @@ function Index() {
     setShareToggle(state => !state)
   }
 
+  function createYourList() {
+    window.location.href = window.location.origin
+  }
+
   return (
     <React.Fragment>
+      <div>
+        <h1>Binance App</h1>
+      </div>
       <div className="index-header">
-        <Button type="primary" onClick={shareYourList}>Share your list</Button>
+        {!isUsingHash.check && <Button type="primary" size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
+        {isUsingHash.check && <Button type="primary" size="large" onClick={createYourList}>Create your own list</Button>}
       </div>
       <Modal title="Share your list" visible={shareToggle}
              onOk={() => { copyShareUrl().then(() => setShareToggle(false)); }}
@@ -51,6 +60,10 @@ function Index() {
         <Divider dashed={true} />
         <h2>Hold List</h2>
         <HoldTable />
+        <div className="copyright">
+          [<a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Github</a>]
+          [<a href="https://tuhuynh.com" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Homepage</a>]
+        </div>
       </div>
     </React.Fragment>
   )

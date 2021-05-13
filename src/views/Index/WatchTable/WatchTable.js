@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { Button, Input, Table } from 'antd'
+import { Button, Input, Table, Tag } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 import { selectTableData, selectListWatch, addWatchItem, updateTableData, removeWatchItem } from './watchListSlice'
 import { selectListHold } from '../HoldTable/holdListSlice'
+
+import { isUsingHash } from 'utils/hashParams'
 
 function WatchTable() {
   const tableData = useSelector(selectTableData)
@@ -21,6 +23,11 @@ function WatchTable() {
       title: 'Currency',
       dataIndex: 'pair',
       key: 'pair',
+      render: (_, record) => (
+        <a href={`https://www.binance.com/en/trade/${record.pair}_USDT?type=spot`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
+          <Tag>{record.pair}</Tag>
+        </a>
+      )
     },
     {
       title: 'Price',
@@ -49,13 +56,13 @@ function WatchTable() {
         }
       }
     },
-    {
+    ...!isUsingHash.check ? [{
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />} />
       ),
-    }
+    }] : []
   ]
 
   useEffect(() => {
@@ -89,11 +96,12 @@ function WatchTable() {
 
   return (
     <React.Fragment>
-      <p>
-        <Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>
-          { isAdding ? 'Cancel' : 'Add'}
-        </Button>
-      </p>
+      {!isUsingHash.check &&
+        <p>
+          <Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>
+            { isAdding ? 'Cancel' : 'Add'}
+          </Button>
+        </p>}
       {isAdding &&
         <p>
           <Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/>

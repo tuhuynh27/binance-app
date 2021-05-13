@@ -11,3 +11,8 @@
     position: absolute;
     right: 20px;
 }
+
+.copyright {
+    margin: 20px 20px;
+    text-align: center;
+}

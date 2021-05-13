@@ -23,3 +23,10 @@ export function makeHashParams(obj) {
   const shareStrEncoded = btoa(shareStr)
   return `${window.location.origin}/#data=${shareStrEncoded}`
 }
+
+export const isUsingHash = {
+  get check() {
+    const queryObj = getQueryParams(document.location.hash)
+    return !(!queryObj || Object.keys(queryObj).length === 0)
+  }
+}

@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 
-import watchListReducer from 'views/index/watchListSlice'
-import holdListReducer from 'views/index/holdListSlice'
+import watchListReducer from 'views/Index/WatchTable/watchListSlice'
+import holdListReducer from 'views/Index/HoldTable/holdListSlice'
 
 export default configureStore({
   reducer: {

@@ -5,6 +5,8 @@ import { Button, Input, List, Modal, Popconfirm } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
 
+import { isUsingHash } from 'utils/hashParams'
+
 function HoldTable() {
   const listHold = useSelector(selectListHold)
   const dispatch = useDispatch()
@@ -36,7 +38,10 @@ function HoldTable() {
 
   return (
     <React.Fragment>
-      <p><Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button></p>
+      {!isUsingHash.check &&
+        <p>
+          <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
+        </p>}
       <List
         size="default"
         bordered
@@ -44,14 +49,14 @@ function HoldTable() {
         renderItem={item =>
           <List.Item>
             Holding {item.amount} {item.pair} at {item.price} USDT
-            <Popconfirm
+            {!isUsingHash.check && <Popconfirm
               title="Are you sure?"
               onConfirm={() => handleDeleteHold(item.pair)}
               okText="Yes"
               cancelText="No"
             >
               <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
-            </Popconfirm>
+            </Popconfirm>}
           </List.Item>}
       />
       <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
