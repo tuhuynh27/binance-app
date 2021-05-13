@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
+import { Button, Input, List, Modal, Popconfirm, Statistic, message } from 'antd'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
@@ -45,6 +45,11 @@ function HoldTable() {
       {!isUsingHash.check &&
         <p>
           <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
+          <Button
+            type="default" style={{ marginBottom: '10px', marginLeft: '10px' }}
+            onClick={() => message.error('API Key not found, please attach Binance API Key')}>
+            Import data via Binance API Key
+          </Button>
         </p>}
       <List
         size="default"

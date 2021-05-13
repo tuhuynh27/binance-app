@@ -25,7 +25,7 @@ function WatchTable() {
       key: 'pair',
       render: (_, record) => (
         <a href={`https://www.binance.com/en/trade/${record.pair}_USDT?type=spot`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
-          <Tag>{record.pair}</Tag>
+          <Tag color={record.change >= 0 ? 'green' : 'red'}>{record.pair}</Tag>
         </a>
       )
     },
@@ -40,7 +40,7 @@ function WatchTable() {
         const pickedList = listHold.filter(e => e.pair === record.pair)
         const list = pickedList.map(picked => {
           return (
-            <div key={picked.price.toString() + picked.amount.toString()}>
+            <div style={{ fontWeight: 'bold' }} key={picked.price.toString() + picked.amount.toString()}>
               {(record.price / picked.price * 100 - 100).toFixed(2)}%
             </div>
           )
