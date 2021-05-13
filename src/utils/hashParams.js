@@ -1,7 +1,8 @@
 export function getHashParams() {
-  const query = getQueryParams(document.location.hash)
-  if (!query || Object.keys(query).length === 0) return { listWatch: null, listHold: null }
-  return JSON.parse(query['#data'])
+  const queryObj = getQueryParams(document.location.hash)
+  if (!queryObj || Object.keys(queryObj).length === 0) return { listWatch: null, listHold: null }
+  const query = atob(queryObj['#data'])
+  return JSON.parse(query)
 }
 
 function getQueryParams(qs) {
@@ -15,4 +16,10 @@ function getQueryParams(qs) {
   }
 
   return params;
+}
+
+export function makeHashParams(obj) {
+  const shareStr = JSON.stringify(obj)
+  const shareStrEncoded = btoa(shareStr)
+  return `${window.location.origin}/#data=${shareStrEncoded}`
 }

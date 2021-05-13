@@ -5,7 +5,7 @@ import { Button, Input, Table, Divider, List, Modal, Popconfirm } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 import { usePersistence } from 'utils/persistence'
-import { getHashParams } from 'utils/hashParams'
+import { getHashParams, makeHashParams } from 'utils/hashParams'
 import { reducer, buildInitialData } from './data'
 
 const hashData = getHashParams()
@@ -129,11 +129,10 @@ function Index() {
   }
 
   function shareYourList() {
-    const shareStr = JSON.stringify({
+    const shareUrl = makeHashParams({
       listHold,
       listWatch
     })
-    const shareUrl = `${window.location.origin}/#data=${shareStr}`
     setShareUrl(shareUrl)
     setShareToggle(state => !state)
   }
