@@ -1,4 +1,5 @@
 import './App.css'
+import React from 'react'
 
 import {
   BrowserRouter as Router,
@@ -6,7 +7,7 @@ import {
   Route
 } from 'react-router-dom'
 
-import Index from './views/index/Index'
+import Index from './views/Index/Index'
 
 function App() {
   return (
@@ -20,4 +21,4 @@ function App() {
   );
 }
 
-export default App
+export default React.memo(App)
