@@ -39,9 +39,10 @@ function WatchTable() {
       render: (_, record) => {
         const pickedList = listHold.filter(e => e.pair === record.pair)
         const list = pickedList.map(picked => {
+          const value = (record.price / picked.price * 100 - 100).toFixed(2)
           return (
-            <div style={{ fontWeight: 'bold' }} key={picked.price.toString() + picked.amount.toString()}>
-              {(record.price / picked.price * 100 - 100).toFixed(2)}%
+            <div style={{ fontWeight: 'bold', color: value >= 0 ? 'green' : 'red' }} key={picked.price.toString() + picked.amount.toString()}>
+              {value}%
             </div>
           )
         })
@@ -57,9 +58,10 @@ function WatchTable() {
       render: (_, record) => {
         const pickedList = listHold.filter(e => e.pair === record.pair)
         const list = pickedList.map(picked => {
+          const value = ((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)
           return (
-            <div key={picked.price.toString() + picked.amount.toString()}>
-              {((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}
+            <div style={{ fontWeight: 'bold', color: value >= 0 ? 'green' : 'red' }} key={picked.price.toString() + picked.amount.toString()}>
+              {value}
             </div>
           )
         })

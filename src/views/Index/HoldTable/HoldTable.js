@@ -1,14 +1,16 @@
 import React, { useState } from 'react'
 
-import { Button, Input, List, Modal, Popconfirm, Statistic, message } from 'antd'
+import { Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
+import { selectListHold, addHoldItem, deleteHoldItem, setListHold } from './holdListSlice'
+import { selectListWatch } from '../WatchTable/watchListSlice'
 
 import { isUsingHash } from 'utils/hashParams'
 
 function HoldTable() {
   const listHold = useSelector(selectListHold)
+  const listWatch = useSelector(selectListWatch)
   const dispatch = useDispatch()
 
   const [isHoldAdding, setIsHoldAdding] = useState(false)
@@ -40,6 +42,23 @@ function HoldTable() {
     return listHold.reduce((accumulator, e) => accumulator + (e.amount * e.price), 0)
   }
 
+  async function importDataBinance() {
+    const holdings = await getHolding(listWatch)
+    dispatch(setListHold(holdings))
+  }
+
+  async function getHolding(symbols) {
+    const resp = await fetch('http://localhost:1234/holding', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ symbols })
+    })
+    return await resp.json()
+  }
+
   return (
     <React.Fragment>
       {!isUsingHash.check &&
@@ -47,7 +66,7 @@ function HoldTable() {
           <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
           <Button
             type="default" style={{ marginBottom: '10px', marginLeft: '10px' }}
-            onClick={() => message.error('API Key not found, please attach Binance API Key')}>
+            onClick={importDataBinance}>
             Import data via Binance API Key
           </Button>
         </p>}

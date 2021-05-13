@@ -1,10 +1,10 @@
-# Binance Holder App
+# Binance Holder Proxy Server
 
 Run:
 
 ```shell
 git clone git@github.com:tuhuynh27/binance-app.git
-cd binance-app
+cd binance-app/server
 yarn
-yarn start
+PORT=1234 node main.js
 ```

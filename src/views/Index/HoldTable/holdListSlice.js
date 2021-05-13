@@ -20,11 +20,15 @@ export const holdListSlice = createSlice({
       const deleteIndexListData = state.listHold.find(e => e.pair === pair)
       state.listHold.splice(deleteIndexListData, 1)
       persistence.set('binance_listHold', state.listHold)
+    },
+    setListHold: (state, action) => {
+      state.listHold = action.payload
+      persistence.set('binance_listHold', state.listHold)
     }
   }
 })
 
-export const { addHoldItem, deleteHoldItem } = holdListSlice.actions
+export const { addHoldItem, deleteHoldItem, setListHold } = holdListSlice.actions
 
 export const selectListHold = state => state.holdList.listHold
 
