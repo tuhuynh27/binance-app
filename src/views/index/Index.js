@@ -1,49 +1,11 @@
+import './Index.css'
 import React, { useState, useReducer, useEffect } from 'react'
 
-import { Button, Input, Table, Divider, List, Modal } from 'antd'
+import { Button, Input, Table, Divider, List, Modal, Popconfirm } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 import { usePersistence } from 'utils/persistence'
-
-function reducer(state, action) {
-  switch(action.type) {
-    case 'update':
-      const { stream, price } = action.payload
-      const isExisted = state.find(e => e.stream === stream)
-      if (!isExisted) {
-        return [
-          ...state,
-          {
-            stream,
-            pair: stream.slice(0, -13).toUpperCase(),
-            price
-          }
-        ]
-      }
-      return state.map(e =>{
-        if (e.stream !== stream) {
-          return e
-        }
-        return {
-          ...e,
-          price
-        }
-      })
-    case 'delete':
-      const { pair } = action.payload
-      return state.filter(e => e.pair !== pair)
-    default:
-      throw new Error()
-  }
-}
-
-function buildInitialData(listWatch = []) {
-  return listWatch.map(e => ({
-    stream: `${e.toLowerCase()}usdt@aggTrade`,
-    pair: e,
-    price: 0
-  }))
-}
+import { reducer, buildInitialData } from './data'
 
 function Index() {
   const watchStore = usePersistence('binance_listWatch')
@@ -51,10 +13,9 @@ function Index() {
 
   const columns = [
     {
-      title: 'Pair',
+      title: 'Currency',
       dataIndex: 'pair',
       key: 'pair',
-      render: (val) => `${val} / USDT`
     },
     {
       title: 'Price',
@@ -87,7 +48,7 @@ function Index() {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button onClick={() => handleDelete(record.pair)} icon={<DeleteOutlined />} />
+        <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />} />
       ),
     }
   ]
@@ -118,7 +79,7 @@ function Index() {
     }
   }, [listWatch, dispatch])
 
-  function handleAdd() {
+  function handleAddWatch() {
     setListWatch(state => [
       ...state,
       newPair.toUpperCase()
@@ -128,7 +89,7 @@ function Index() {
     setIsAdding(state => !state)
   }
 
-  function handleDelete(stream) {
+  function handleDeleteWatch(stream) {
     setListWatch(state => state.filter(e => e !== stream))
     dispatch({ type: 'delete', payload: { pair: stream } })
     watchStore.set(listWatch.filter(e => e !== stream))
@@ -157,21 +118,33 @@ function Index() {
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+    <div className="index-container">
       <h2>Watch List</h2>
       <p><Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>{ isAdding ? 'Cancel' : 'Add'}</Button></p>
-      {isAdding && <p><Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAdd} placeholder="Enter to add"/></p>}
+      {isAdding && <p><Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/></p>}
       <Table size="middle" rowKey="stream" columns={columns} dataSource={state} />
       <Divider dashed={true} />
       <h2>Hold List</h2>
       <p><Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button></p>
       <List
-        size="small"
+        size="default"
         bordered
         dataSource={listHold}
-        renderItem={item => <List.Item>Holding {item.amount} {item.pair} at {item.price} USDT <Button size="small" onClick={() => handleDeleteHold(item.pair)}>Sold</Button></List.Item>}
+        renderItem={item =>
+          <List.Item>
+            Holding {item.amount} {item.pair} at {item.price} USDT
+            <Popconfirm
+              title="Are you sure?"
+              onConfirm={() => handleDeleteHold(item.pair)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
+            </Popconfirm>
+          </List.Item>}
       />
       <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
+        {!holdPair && <p>Please enter what you are holding</p>}
         {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
         <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)"/></p>
         <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price"/></p>
