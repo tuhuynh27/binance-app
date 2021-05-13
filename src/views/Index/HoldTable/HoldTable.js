@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 
+import Import from './Import'
+
 import { Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { selectListHold, addHoldItem, deleteHoldItem, setListHold } from './holdListSlice'
-import { selectListWatch } from '../WatchTable/watchListSlice'
+import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
 
 import { isUsingHash } from 'utils/hashParams'
 
 function HoldTable() {
   const listHold = useSelector(selectListHold)
-  const listWatch = useSelector(selectListWatch)
   const dispatch = useDispatch()
 
   const [isHoldAdding, setIsHoldAdding] = useState(false)
@@ -34,29 +34,12 @@ function HoldTable() {
     setIsHoldAdding(false)
   }
 
-  function handleDeleteHold(pair) {
-    dispatch(deleteHoldItem({ pair }))
+  function handleDeleteHold(index) {
+    dispatch(deleteHoldItem(index))
   }
 
   function calcHoldingBalance() {
     return listHold.reduce((accumulator, e) => accumulator + (e.amount * e.price), 0)
-  }
-
-  async function importDataBinance() {
-    const holdings = await getHolding(listWatch)
-    dispatch(setListHold(holdings))
-  }
-
-  async function getHolding(symbols) {
-    const resp = await fetch('http://localhost:1234/holding', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ symbols })
-    })
-    return await resp.json()
   }
 
   return (
@@ -64,23 +47,19 @@ function HoldTable() {
       {!isUsingHash.check &&
         <p>
           <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
-          <Button
-            type="default" style={{ marginBottom: '10px', marginLeft: '10px' }}
-            onClick={importDataBinance}>
-            Import data via Binance API Key
-          </Button>
+          <Import />
         </p>}
       <List
         size="default"
         bordered
         dataSource={listHold}
         rowKey={(item) => item.pair + item.amount + item.price}
-        renderItem={item =>
+        renderItem={(item, index) =>
           <List.Item>
             Holding {item.amount} {item.pair} at {item.price} USDT
             {!isUsingHash.check && <Popconfirm
               title="Are you sure?"
-              onConfirm={() => handleDeleteHold(item.pair)}
+              onConfirm={() => handleDeleteHold(index)}
               okText="Yes"
               cancelText="No"
             >
