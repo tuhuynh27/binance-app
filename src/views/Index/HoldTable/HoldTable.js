@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Button, Input, List, Modal, Popconfirm } from 'antd'
+import { Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
@@ -36,6 +36,10 @@ function HoldTable() {
     dispatch(deleteHoldItem({ pair }))
   }
 
+  function calcHoldingBalance() {
+    return listHold.reduce((accumulator, e) => accumulator + (e.amount * e.price), 0)
+  }
+
   return (
     <React.Fragment>
       {!isUsingHash.check &&
@@ -58,13 +62,14 @@ function HoldTable() {
               <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
             </Popconfirm>}
           </List.Item>}
+        header={<Statistic title="Holding Balance (USDT)" value={calcHoldingBalance()} precision={2} />}
       />
       <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
         {!holdPair && <p>Please enter what you are holding</p>}
         {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
-        <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)"/></p>
-        <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price"/></p>
-        <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount"/></p>
+        <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)" allowClear/></p>
+        <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price" prefix="$" suffix="USDT" allowClear/></p>
+        <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount" allowClear/></p>
       </Modal>
     </React.Fragment>
   )

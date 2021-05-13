@@ -41,7 +41,7 @@ function Index() {
   return (
     <React.Fragment>
       <div>
-        <h1>Binance App</h1>
+        <h1>Binance Holder App</h1>
       </div>
       <div className="index-header">
         {!isUsingHash.check && <Button type="primary" size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
@@ -62,7 +62,6 @@ function Index() {
         <HoldTable />
         <div className="copyright">
           [<a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Github</a>]
-          [<a href="https://tuhuynh.com" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Homepage</a>]
         </div>
       </div>
     </React.Fragment>

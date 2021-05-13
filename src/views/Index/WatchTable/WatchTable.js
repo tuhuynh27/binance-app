@@ -37,23 +37,33 @@ function WatchTable() {
     {
       title: 'PNL (%)',
       render: (_, record) => {
-        const picked = listHold.find(e => e.pair === record.pair)
-        if (picked) {
+        const pickedList = listHold.filter(e => e.pair === record.pair)
+        const list = pickedList.map(picked => {
           return (
-            <span>{(record.price / picked.price * 100 - 100).toFixed(2)}%</span>
+            <div>{(record.price / picked.price * 100 - 100).toFixed(2)}%</div>
           )
-        }
+        })
+        return (
+          <React.Fragment>
+            {list}
+          </React.Fragment>
+        )
       }
     },
     {
       title: 'PNL ($)',
       render: (_, record) => {
-        const picked = listHold.find(e => e.pair === record.pair)
-        if (picked) {
+        const pickedList = listHold.filter(e => e.pair === record.pair)
+        const list = pickedList.map(picked => {
           return (
-            <span>{((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}</span>
+            <div>{((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}</div>
           )
-        }
+        })
+        return (
+          <React.Fragment>
+            {list}
+          </React.Fragment>
+        )
       }
     },
     ...!isUsingHash.check ? [{
