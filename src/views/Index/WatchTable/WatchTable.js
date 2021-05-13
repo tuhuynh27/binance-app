@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { Button, Input, Table, Tag } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
-import { selectTableData, selectListWatch, addWatchItem, updateTableData, removeWatchItem } from './watchListSlice'
+import { selectTableData, selectListWatch, addWatchItem, updateTableData, updateMetadata, removeWatchItem } from './watchListSlice'
 import { selectListHold } from '../HoldTable/holdListSlice'
 
 import { isUsingHash } from 'utils/hashParams'
@@ -40,7 +40,9 @@ function WatchTable() {
         const pickedList = listHold.filter(e => e.pair === record.pair)
         const list = pickedList.map(picked => {
           return (
-            <div>{(record.price / picked.price * 100 - 100).toFixed(2)}%</div>
+            <div key={picked.price.toString() + picked.amount.toString()}>
+              {(record.price / picked.price * 100 - 100).toFixed(2)}%
+            </div>
           )
         })
         return (
@@ -56,7 +58,9 @@ function WatchTable() {
         const pickedList = listHold.filter(e => e.pair === record.pair)
         const list = pickedList.map(picked => {
           return (
-            <div>{((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}</div>
+            <div key={picked.price.toString() + picked.amount.toString()}>
+              {((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)}
+            </div>
           )
         })
         return (
@@ -65,6 +69,27 @@ function WatchTable() {
           </React.Fragment>
         )
       }
+    },
+    {
+      title: '24h Change',
+      dataIndex: 'highLow',
+      key: 'highLow',
+      render: (_, record) => (
+        <React.Fragment>
+          <div>High: {record.high || 0}</div>
+          <div>Low: {record.low || 0}</div>
+          <div>Change: <span style={{ fontWeight: 'bold', color: record.change >= 0 ? 'green' : 'red' }}>{record.change || 0}%</span></div>
+        </React.Fragment>
+      )
+    },
+    {
+      title: '24h Volume ($)',
+      dataIndex: 'volume',
+      key: 'volume',
+      sorter: (a, b) => parseFloat(a.volume) - parseFloat(b.volume),
+      render: (_, record) => (
+        <React.Fragment>{(record.volume * record.price).toFixed(0) || 0}</React.Fragment>
+      )
     },
     ...!isUsingHash.check ? [{
       title: 'Action',
@@ -90,6 +115,36 @@ function WatchTable() {
       socket.close()
     }
   }, [listWatch, dispatch])
+
+  const loadMeta = useCallback(
+    async () => {
+      for (const e of listWatch) {
+        const resp = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${e}USDT`)
+        const data = await resp.json()
+        const highPrice = parseFloat(data.highPrice)
+        const lowPrice = parseFloat(data.lowPrice)
+        const volume = parseFloat(data.volume)
+        const change = parseFloat(data.priceChangePercent)
+        dispatch(updateMetadata({
+          stream: `${e.toLowerCase()}usdt@aggTrade`,
+          highPrice: highPrice.toFixed(highPrice > 1000 ? 2 : 6),
+          lowPrice: lowPrice.toFixed(highPrice > 1000 ? 2 : 6),
+          volume: volume.toFixed(0),
+          change: change.toFixed(2),
+        }))
+      }
+    }, [listWatch, dispatch]
+  )
+
+  useEffect(() => {
+    setTimeout(() => void loadMeta(), 1000)
+    const interval = setInterval(() => {
+      void loadMeta()
+    }, 5000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [loadMeta])
 
   function handleAddWatch() {
     if (!newPair || !newPair.length) {

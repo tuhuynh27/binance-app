@@ -6,7 +6,11 @@ function buildInitialData(listWatch = []) {
   return listWatch.map(e => ({
     stream: `${e.toLowerCase()}usdt@aggTrade`,
     pair: e,
-    price: 0
+    price: 0,
+    high: null,
+    low: null,
+    volume: null,
+    change: null,
   }))
 }
 
@@ -31,12 +35,25 @@ export const watchListSlice = createSlice({
         const newItem = {
           stream,
           pair: stream.slice(0, -13).toUpperCase(),
-          price
+          price,
+          high: null,
+          low: null,
+          volume: null,
+          change: null,
         }
         state.tableData.push(newItem)
       } else {
         existedItem.price = price
       }
+    },
+    updateMetadata: (state, action) => {
+      const { stream, highPrice, lowPrice, volume, change } = action.payload
+      const existedItem = state.tableData.find(e => e.stream === stream)
+      if (!existedItem) return
+      existedItem.high = highPrice
+      existedItem.low = lowPrice
+      existedItem.volume = volume
+      existedItem.change = change
     },
     removeWatchItem: (state, action) => {
       const { pair } = action.payload
@@ -49,7 +66,7 @@ export const watchListSlice = createSlice({
   }
 })
 
-export const { addWatchItem, updateTableData, removeWatchItem } = watchListSlice.actions
+export const { addWatchItem, updateTableData, updateMetadata, removeWatchItem } = watchListSlice.actions
 
 export const selectTableData = state => state.watchList.tableData
 export const selectListWatch = state => state.watchList.listWatch
