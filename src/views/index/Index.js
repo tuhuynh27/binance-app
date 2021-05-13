@@ -5,11 +5,27 @@ import { Button, Input, Table, Divider, List, Modal, Popconfirm } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 import { usePersistence } from 'utils/persistence'
+import { getHashParams } from 'utils/hashParams'
 import { reducer, buildInitialData } from './data'
+
+const hashData = getHashParams()
 
 function Index() {
   const watchStore = usePersistence('binance_listWatch')
   const holdStore = usePersistence('binance_listHold')
+
+  const [listWatch, setListWatch] = useState(hashData.listWatch || watchStore.get() || ['BTC', 'ETH'])
+  const initialData = buildInitialData(listWatch)
+  const [state, dispatch] = useReducer(reducer, initialData, undefined)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newPair, setNewPair] = useState(null)
+  const [listHold, setListHold] = useState(hashData.listHold || holdStore.get() || [])
+  const [isHoldAdding, setIsHoldAdding] = useState(false)
+  const [holdPair, setHoldPair] = useState(null)
+  const [holdPrice, setHoldPrice] = useState(null)
+  const [holdAmount, setHoldAmount] = useState(null)
+  const [shareToggle, setShareToggle] = useState(false)
+  const [shareUrl, setShareUrl] = useState(null)
 
   const columns = [
     {
@@ -53,17 +69,6 @@ function Index() {
     }
   ]
 
-  const [listWatch, setListWatch] = useState(watchStore.get() || ['BTC', 'ETH'])
-  const initialData = buildInitialData(listWatch)
-  const [state, dispatch] = useReducer(reducer, initialData, undefined)
-  const [isAdding, setIsAdding] = useState(false)
-  const [newPair, setNewPair] = useState(null)
-  const [listHold, setListHold] = useState(holdStore.get() || [])
-  const [isHoldAdding, setIsHoldAdding] = useState(false)
-  const [holdPair, setHoldPair] = useState(null)
-  const [holdPrice, setHoldPrice] = useState(null)
-  const [holdAmount, setHoldAmount] = useState(null)
-
   useEffect(() => {
     const listWatchStream = listWatch.map(e =>`${e.toLowerCase()}usdt@aggTrade`)
     const connectStr = listWatchStream.join('/')
@@ -80,6 +85,9 @@ function Index() {
   }, [listWatch, dispatch])
 
   function handleAddWatch() {
+    if (!newPair || !newPair.length) {
+      return
+    }
     setListWatch(state => [
       ...state,
       newPair.toUpperCase()
@@ -96,6 +104,9 @@ function Index() {
   }
 
   function handleAddHold() {
+    if (!holdPair || !holdPrice || !holdAmount) {
+      return
+    }
     const newHold = {
       pair: holdPair.toUpperCase(),
       price: holdPrice,
@@ -117,40 +128,67 @@ function Index() {
     holdStore.set(listHold.filter(e => e.pair !== pair))
   }
 
+  function shareYourList() {
+    const shareStr = JSON.stringify({
+      listHold,
+      listWatch
+    })
+    const shareUrl = `${window.location.origin}/#data=${shareStr}`
+    setShareUrl(shareUrl)
+    setShareToggle(state => !state)
+  }
+
+  async function copyShareUrl() {
+    await navigator.clipboard.writeText(shareUrl.toString())
+    setShareToggle(state => !state)
+  }
+
   return (
-    <div className="index-container">
-      <h2>Watch List</h2>
-      <p><Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>{ isAdding ? 'Cancel' : 'Add'}</Button></p>
-      {isAdding && <p><Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/></p>}
-      <Table size="middle" rowKey="stream" columns={columns} dataSource={state} />
-      <Divider dashed={true} />
-      <h2>Hold List</h2>
-      <p><Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button></p>
-      <List
-        size="default"
-        bordered
-        dataSource={listHold}
-        renderItem={item =>
-          <List.Item>
-            Holding {item.amount} {item.pair} at {item.price} USDT
-            <Popconfirm
-              title="Are you sure?"
-              onConfirm={() => handleDeleteHold(item.pair)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
-            </Popconfirm>
-          </List.Item>}
-      />
-      <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
-        {!holdPair && <p>Please enter what you are holding</p>}
-        {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
-        <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)"/></p>
-        <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price"/></p>
-        <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount"/></p>
+    <React.Fragment>
+      <div className="index-header">
+        <Button type="primary" onClick={shareYourList}>Share your list</Button>
+      </div>
+      <Modal title="Share your list" visible={shareToggle}
+             onOk={() => { copyShareUrl().then(() => setShareToggle(false)); }}
+             okText="Copy to clipboard"
+             onCancel={() => setShareToggle(false)}>
+        <p>You can share your list to your friends by sending them this URL</p>
+        <p><Input value={shareUrl} /></p>
       </Modal>
-    </div>
+      <div className="index-container">
+        <h2>Watch List</h2>
+        <p><Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>{ isAdding ? 'Cancel' : 'Add'}</Button></p>
+        {isAdding && <p><Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/></p>}
+        <Table size="middle" rowKey="stream" columns={columns} dataSource={state} />
+        <Divider dashed={true} />
+        <h2>Hold List</h2>
+        <p><Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button></p>
+        <List
+          size="default"
+          bordered
+          dataSource={listHold}
+          renderItem={item =>
+            <List.Item>
+              Holding {item.amount} {item.pair} at {item.price} USDT
+              <Popconfirm
+                title="Are you sure?"
+                onConfirm={() => handleDeleteHold(item.pair)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
+              </Popconfirm>
+            </List.Item>}
+        />
+        <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
+          {!holdPair && <p>Please enter what you are holding</p>}
+          {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
+          <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)"/></p>
+          <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price"/></p>
+          <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount"/></p>
+        </Modal>
+      </div>
+    </React.Fragment>
   )
 }
 
