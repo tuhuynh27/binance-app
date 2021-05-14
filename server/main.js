@@ -5,13 +5,42 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-async function getHoldForSingleSymbol(symbol, apiKey, apiSecret) {
-  function sign(queryString) {
-    return createHmac('sha256', Buffer.from(apiSecret)).update(queryString).digest('hex')
-  }
+function sign(queryString, apiSecret) {
+  return createHmac('sha256', Buffer.from(apiSecret)).update(queryString).digest('hex')
+}
 
-  const queryString = `symbol=${symbol.toUpperCase()}USDT&timestamp=${Date.now()}`
-  const signature = sign(queryString)
+async function getAccountInformation(apiKey, apiSecret) {
+  const queryString = `timestamp=${Date.now()}`
+  const signature = sign(queryString, apiSecret)
+  try {
+    const resp = await fetch('https://api.binance.com/api/v3/account' + '?' + queryString + '&signature=' + signature, {
+      headers: {
+        'X-MBX-APIKEY': apiKey,
+      },
+    })
+    const data = await resp.json()
+    const { balances } = data
+    balances.sort((a, b) => {
+      const aa = parseFloat(a.free)
+      const bb = parseFloat(b.free)
+      return bb - aa
+    })
+    const result = balances.slice(0, 20).filter(e => {
+      const free = parseFloat(e.free)
+      return free > 0
+    })
+    return result.map(e => ({
+      amount: parseFloat(e.free),
+      pair: e.asset
+    }))
+  } catch (err) {
+    throw err
+  }
+}
+
+async function getHoldForAsset(asset, apiKey, apiSecret) {
+  const queryString = `symbol=${asset.toUpperCase()}USDT&timestamp=${Date.now()}`
+  const signature = sign(queryString, apiSecret)
   try {
     const resp = await fetch('https://api.binance.com/api/v3/myTrades' + '?' + queryString + '&signature=' + signature, {
       headers: {
@@ -19,31 +48,27 @@ async function getHoldForSingleSymbol(symbol, apiKey, apiSecret) {
       },
     })
     const trades = await resp.json()
-    let amount = 0
     let price = 0
     for (const trade of trades) {
       const isBuy = trade.isBuyer
       if (isBuy) {
-        amount += parseFloat(trade.qty)
         price = parseFloat(trade.price)
-      } else {
-        amount -= parseFloat(trade.qty)
       }
     }
-    return { amount, price }
+    return { price }
   } catch (err) {
     throw err
   }
 }
 
-async function getHoldForSymbols(symbols, apiKey, apiSecret) {
+async function getHoldForAssets(assets, apiKey, apiSecret) {
   const result = []
-  for (const symbol of symbols) {
+  for (const asset of assets) {
     try {
-      const { amount, price } = await getHoldForSingleSymbol(symbol, apiKey, apiSecret)
+      const { price } = await getHoldForAsset(asset.pair, apiKey, apiSecret)
       result.push({
-        pair: symbol,
-        amount,
+        pair: asset.pair,
+        amount: asset.amount,
         price
       })
     } catch (err) {
@@ -58,10 +83,14 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.post('/holding', async function (req, res) {
-  const { symbols, apiKey, apiSecret } = req.body
+  const { apiKey, apiSecret } = req.body
   try {
-    const data = await getHoldForSymbols(symbols, apiKey, apiSecret)
-    res.send(data)
+    const assets = await getAccountInformation(apiKey, apiSecret)
+    const data = await getHoldForAssets(assets, apiKey, apiSecret)
+    res.send({
+      pairs: assets.map(e => e.pair),
+      holds: data
+    })
   } catch (err) {
     res.status(400).send({
       err: err.message
@@ -69,7 +98,7 @@ app.post('/holding', async function (req, res) {
   }
 })
 
-const port = process.env.PORT || 1234
+const port = process.env.PORT || 8989
 app.listen(port, () => {
   console.log(`Binance server listening at http://localhost:${port}`)
 })
