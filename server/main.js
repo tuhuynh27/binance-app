@@ -49,7 +49,7 @@ async function getHoldForAsset(asset, apiKey, apiSecret) {
     })
     const trades = await resp.json()
     let price = 0
-    for (const trade of trades) {
+    for (const trade in trades) {
       const isBuy = trade.isBuyer
       if (isBuy) {
         price = parseFloat(trade.price)
