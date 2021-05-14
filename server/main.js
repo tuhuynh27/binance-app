@@ -27,7 +27,7 @@ async function getAccountInformation(apiKey, apiSecret) {
     })
     const result = balances.slice(0, 20).filter(e => {
       const free = parseFloat(e.free)
-      return free > 0
+      return free > 0 && e.asset !== 'USDT'
     })
     return result.map(e => ({
       amount: parseFloat(e.free),
