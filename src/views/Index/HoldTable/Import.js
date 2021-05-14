@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Button, Input, Modal, notification } from 'antd'
+import { Button, Input, Modal, Popconfirm, notification } from 'antd'
 
 import { setListHold } from './holdListSlice'
 import { setWatchItems } from '../WatchTable/watchListSlice'
@@ -108,11 +108,14 @@ function Import() {
         onClick={handleImport}>
         Import data via Binance API Key
       </Button>
-      {canDelete && <Button
-        type="dashed" style={{ marginBottom: '10px', marginLeft: '10px' }}
-        onClick={handleDelete}>
-        Delete API Key
-      </Button>}
+      {canDelete &&
+        <Popconfirm
+          title="Are you sure?"
+          onConfirm={handleDelete}
+          okText="Yes"
+          cancelText="No">
+            <Button type="dashed" style={{ marginBottom: '10px', marginLeft: '10px' }}>Delete API Key</Button>
+        </Popconfirm>}
       <Modal title="Enter Binance API Key" visible={isModalOpen} onOk={handleSave} onCancel={() => setIsModalOpen(false)}>
         <p>Please visit <a href="https://www.binance.com/en/my/settings/api-management" target="_blank" rel="noreferrer">here</a> to setup Binance API. After created API, please <strong>only Enable Reading</strong> as show below.</p>
         <p style={{ textAlign: 'center' }}><img src={BinanceAPIKeySetupImg} style={{ maxWidth: '75%' }} alt="Setup Guide"/></p>

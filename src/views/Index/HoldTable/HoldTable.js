@@ -2,12 +2,13 @@ import React, { useState } from 'react'
 
 import Import from './Import'
 
-import { Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
+import { Alert, Button, Input, List, Modal, Popconfirm, Statistic } from 'antd'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectListHold, addHoldItem, deleteHoldItem } from './holdListSlice'
 
 import { isUsingHash } from 'utils/hashParams'
+import * as persistence from 'utils/persistence'
 
 function HoldTable() {
   const listHold = useSelector(selectListHold)
@@ -44,6 +45,14 @@ function HoldTable() {
 
   return (
     <React.Fragment>
+      {!isUsingHash.check && !persistence.get('binance_apiKey') && <Alert
+        message="You can import data from your Binance account"
+        description="Via Binance API, you can safely import all your holding data. You can set your API to only allow read permission, also we don't store your API, so it's truly safe and convenient."
+        type="info"
+        showIcon
+        closable
+        style={{ marginBottom: '1.5rem' }}
+      />}
       {!isUsingHash.check &&
         <p>
           <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
