@@ -27,7 +27,7 @@ async function getAccountInformation(apiKey, apiSecret) {
     })
     const result = balances.slice(0, 20).filter(e => {
       const free = parseFloat(e.free)
-      return free > 0 && e.asset !== 'USDT'
+      return free > 0 && e.asset !== 'USDT' && e.asset !== 'BUSD'
     })
     return result.map(e => ({
       amount: parseFloat(e.free),
@@ -75,7 +75,7 @@ async function getHoldForAssets(assets, apiKey, apiSecret) {
       throw err
     }
   }
-  return result
+  return result.filter(e => e.amount * e.price > 1)
 }
 
 app.use(cors())

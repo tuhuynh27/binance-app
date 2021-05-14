@@ -56,7 +56,7 @@ function HoldTable() {
         rowKey={(item) => item.pair + item.amount + item.price}
         renderItem={(item, index) =>
           <List.Item>
-            Holding {item.amount} {item.pair} at {item.price} USDT
+            Holding {item.amount} {item.pair} at {item.price} USDT | Total: <strong>{(item.amount * item.price).toFixed(2)}</strong> USDT
             {!isUsingHash.check && <Popconfirm
               title="Are you sure?"
               onConfirm={() => handleDeleteHold(index)}
@@ -70,7 +70,7 @@ function HoldTable() {
       />
       <Modal title="Add item to hold list" visible={isHoldAdding} onOk={handleAddHold} onCancel={() => setIsHoldAdding(false)}>
         {!holdPair && <p>Please enter what you are holding</p>}
-        {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT</p>}
+        {holdPair && <p>Preview: Holding {holdAmount || 0} {holdPair.toUpperCase()} at {holdPrice || 0} USDT [Total: {holdAmount * holdPrice} USDT]</p>}
         <p><Input value={holdPair} onChange={e => setHoldPair(e.target.value)} placeholder="Name (eg: BTC)" allowClear/></p>
         <p><Input value={holdPrice} onChange={e => setHoldPrice(e.target.value)} placeholder="Price" prefix="$" suffix="USDT" allowClear/></p>
         <p><Input value={holdAmount} onChange={e => setHoldAmount(e.target.value)} placeholder="Amount" allowClear/></p>
