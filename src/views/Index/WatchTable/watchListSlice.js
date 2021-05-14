@@ -28,6 +28,11 @@ export const watchListSlice = createSlice({
       state.listWatch.push(newPair)
       persistence.set('binance_listWatch', state.listWatch)
     },
+    setWatchItems: (state, action) => {
+      const listWatch = action.payload
+      state.listWatch = listWatch
+      persistence.set('binance_listWatch', state.listWatch)
+    },
     updateTableData: (state, action) => {
       const { stream, price } = action.payload
       const existedItem = state.tableData.find(e => e.stream === stream)
@@ -66,7 +71,7 @@ export const watchListSlice = createSlice({
   }
 })
 
-export const { addWatchItem, updateTableData, updateMetadata, removeWatchItem } = watchListSlice.actions
+export const { addWatchItem, setWatchItems, updateTableData, updateMetadata, removeWatchItem } = watchListSlice.actions
 
 export const selectTableData = state => state.watchList.tableData
 export const selectListWatch = state => state.watchList.listWatch

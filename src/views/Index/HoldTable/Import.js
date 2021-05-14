@@ -3,15 +3,14 @@ import React, { useState } from 'react'
 import { Button, Input, Modal, notification } from 'antd'
 
 import { setListHold } from './holdListSlice'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectListWatch } from '../WatchTable/watchListSlice'
+import { setWatchItems } from '../WatchTable/watchListSlice'
+import { useDispatch } from 'react-redux'
 
 import * as persistence from 'utils/persistence'
 
 import BinanceAPIKeySetupImg from 'assets/img/binance.jpg'
 
 function Import() {
-  const listWatch = useSelector(selectListWatch)
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -23,11 +22,12 @@ function Import() {
   async function importDataBinance() {
     try {
       setLoading(true)
-      const holdings = await getHolding(listWatch)
-      dispatch(setListHold(holdings))
+      const { pairs, holds } = await getHolding()
+      dispatch(setWatchItems(pairs))
+      dispatch(setListHold(holds))
       notification.success({
         message: 'Success',
-        description: `Imported holding data for ${listWatch.join(', ')}, if you want to see more holding assets, please add more in watch list and then click import again`,
+        description: `Imported success`,
       })
     } catch (err) {
       notification.error({
@@ -39,7 +39,7 @@ function Import() {
     }
   }
 
-  async function getHolding(symbols) {
+  async function getHolding() {
     const apiKey = persistence.get('binance_apiKey')
     const apiSecret = persistence.get('binance_apiSecret')
     const serverUrl = persistence.get('binance_serverUrl')
@@ -49,13 +49,13 @@ function Import() {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ symbols, apiKey, apiSecret })
+      body: JSON.stringify({ apiKey, apiSecret })
     })
     const result = await resp.json()
     if (result.err) {
       throw new Error(result.err)
     }
-    return result.filter(e => e.amount > 0)
+    return result
   }
 
   function handleImport() {
