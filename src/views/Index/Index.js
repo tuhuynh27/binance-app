@@ -4,7 +4,7 @@ import React, { useState} from 'react'
 import WatchTable from './WatchTable/WatchTable'
 import HoldTable from './HoldTable/HoldTable'
 
-import { Button, Input, Divider, Modal, Alert } from 'antd'
+import { Button, Input, Divider, Modal, Alert, Space } from 'antd'
 import { ShareAltOutlined } from '@ant-design/icons'
 
 import { makeHashParams, isUsingHash } from 'utils/hashParams'
@@ -48,17 +48,19 @@ function Index() {
              onOk={() => { copyShareUrl().then(() => setShareToggle(false)); }}
              okText="Copy to clipboard"
              onCancel={() => setShareToggle(false)}>
-        <p>You can share your list to your friends by sending them this URL</p>
-        <p><Input value={shareUrl} /></p>
-        <p>
-          <Alert
-            message="Warning"
-            description="If you change your data (watch list / hold list), a new hash will be generated, so when you change the data please copy the new URL and share again"
-            type="warning"
-            showIcon
-            closable
-          />
-        </p>
+        <Space direction="vertical">
+          <div>You can share your list to your friends by sending them this URL</div>
+          <div><Input value={shareUrl} /></div>
+          <div>
+            <Alert
+              message="Warning"
+              description="If you change your data (watch list / hold list), a new hash will be generated, so when you change the data please copy the new URL and share again"
+              type="warning"
+              showIcon
+              closable
+            />
+          </div>
+        </Space>
       </Modal>
       <div className="index-container">
         <h2>Watch List</h2>

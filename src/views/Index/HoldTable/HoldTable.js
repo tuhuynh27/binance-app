@@ -54,10 +54,10 @@ function HoldTable() {
         style={{ marginBottom: '1.5rem' }}
       />}
       {!isUsingHash.check &&
-        <p>
+        <div>
           <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
           <Import />
-        </p>}
+        </div>}
       <List
         size="default"
         bordered
