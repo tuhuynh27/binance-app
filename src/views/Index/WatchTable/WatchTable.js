@@ -22,14 +22,14 @@ function WatchTable() {
 
   const columns = [
     {
-      title: 'Currency',
+      title: '$',
       dataIndex: 'pair',
       key: 'pair',
       render: (_, record) => (
         <a href={`https://www.binance.com/en/trade/${record.pair}_USDT?type=spot`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
           <Tag color={record.change >= 0 ? 'green' : 'red'}>{record.pair}</Tag>
         </a>
-      )
+      ),
     },
     {
       title: 'Price',
@@ -98,7 +98,8 @@ function WatchTable() {
           <div>Change: <span style={{ fontWeight: 'bold', color: record.change >= 0 ? 'green' : 'red' }}>{record.change || 0}%</span></div>
         </React.Fragment>
         )
-      }
+      },
+      responsive: ['md']
     },
     {
       title: '24h Volume ($)',
@@ -115,13 +116,14 @@ function WatchTable() {
         return (
           <React.Fragment>{(parseFloat(record.volume) * avg).toFixed(0) || 0}</React.Fragment>
         )
-      }
+      },
+      responsive: ['md']
     },
     ...!isUsingHash.check ? [{
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />} />
+        <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />}>Remove</Button>
       ),
     }] : []
   ]
@@ -197,7 +199,11 @@ function WatchTable() {
         <p>
           <Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/>
         </p>}
-      <Table size="middle" rowKey="stream" columns={columns} dataSource={tableData} />
+      <Table scroll={{
+        scrollToFirstRowOnChange: 'false',
+        x: 'max-content',
+        y: 'max-content'
+      }} size="middle" rowKey="stream" columns={columns} dataSource={tableData} />
     </React.Fragment>
   )
 }

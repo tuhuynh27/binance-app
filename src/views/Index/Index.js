@@ -13,9 +13,6 @@ import { useSelector } from 'react-redux'
 import { selectListWatch } from './WatchTable/watchListSlice'
 import { selectListHold } from './HoldTable/holdListSlice'
 
-import Argg from 'assets/img/argg.gif'
-import DogeJump from 'assets/img/DogeJump.gif'
-
 function Index() {
   const [shareToggle, setShareToggle] = useState(false)
   const [shareUrl, setShareUrl] = useState(null)
@@ -43,9 +40,6 @@ function Index() {
 
   return (
     <React.Fragment>
-      <div>
-        <h1>Binance Holder App <img src={DogeJump} alt="DogeJump" style={{ maxWidth: '40px', paddingBottom: '10px' }} /></h1>
-      </div>
       <div className="index-header">
         {!isUsingHash.check && <Button type="primary" size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
         {isUsingHash.check && <Button type="primary" size="large" onClick={createYourList}>Create your own list</Button>}
@@ -72,11 +66,6 @@ function Index() {
         <Divider dashed={true} />
         <h2>Hold List</h2>
         <HoldTable />
-        <div className="copyright">
-          <p>[<a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Github</a>]
-            [<a href="https://github.com/tuhuynh27/binance-app/issues/new" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Report Bug</a>]</p>
-          <p>&copy; 2021 Tu Huynh - Hold to dieee <img src={Argg} alt="Argg" style={{ maxWidth: '30px' }}/> </p>
-        </div>
       </div>
     </React.Fragment>
   )
