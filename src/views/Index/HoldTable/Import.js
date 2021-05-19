@@ -106,7 +106,7 @@ function Import() {
         type="default" style={{ marginBottom: '10px', marginLeft: '10px' }}
         loading={loading}
         onClick={handleImport}>
-        Import data via Binance API Key
+        Import data
       </Button>
       {canDelete &&
         <Popconfirm
