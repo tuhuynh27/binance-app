@@ -22,7 +22,7 @@ function WatchTable() {
 
   const columns = [
     {
-      title: '$',
+      title: '',
       dataIndex: 'pair',
       key: 'pair',
       render: (_, record) => (
@@ -57,7 +57,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list}
+            {list.length ? list : '--'}
           </React.Fragment>
         )
       }
@@ -76,7 +76,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list}
+            {list.length ? list : '--'}
           </React.Fragment>
         )
       }
@@ -120,10 +120,10 @@ function WatchTable() {
       responsive: ['md']
     },
     ...!isUsingHash.check ? [{
-      title: 'Action',
+      title: '',
       key: 'action',
       render: (_, record) => (
-        <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />}>Remove</Button>
+        <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />} />
       ),
     }] : []
   ]
@@ -135,7 +135,9 @@ function WatchTable() {
     function updateRealtime(e) {
       const payload = JSON.parse(e.data)
       const { stream, data } = payload
-      dispatch(updateTableData({ stream, price: data.p }))
+      const priceFloat = parseFloat(data.p)
+      const price = priceFloat.toFixed(priceFloat > 1000 ? 2 : 6)
+      dispatch(updateTableData({ stream, price }))
     }
     socket.addEventListener('message', updateRealtime)
     return () => {
@@ -199,11 +201,10 @@ function WatchTable() {
         <p>
           <Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/>
         </p>}
-      <Table scroll={{
-        scrollToFirstRowOnChange: 'false',
-        x: 'max-content',
-        y: 'max-content'
-      }} size="middle" rowKey="stream" columns={columns} dataSource={tableData} />
+      <Table
+        scroll={{ scrollToFirstRowOnChange: 'false', x: 'max-content', y: 1000 }}
+        pagination={{ position: ['none', 'none'] }}
+        size="large" rowKey="stream" columns={columns} dataSource={tableData} />
     </React.Fragment>
   )
 }

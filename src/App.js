@@ -1,7 +1,7 @@
 import './App.css'
 import React from 'react'
 
-import { Layout, Menu } from 'antd'
+import { Layout } from 'antd'
 
 import {
   BrowserRouter as Router,
@@ -12,6 +12,7 @@ import {
 import Index from './views/Index/Index'
 
 import Argg from 'assets/img/argg.gif'
+import Logo from 'assets/img/logo.png'
 
 const { Header, Content, Footer } = Layout
 
@@ -19,13 +20,10 @@ function App() {
   return (
     <Layout>
     <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
-      <div className="logo" />
-      <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
-        <Menu.Item key="1">Binance Holder App</Menu.Item>
-      </Menu>
+      <img className="logo" src={Logo} alt="Logo" />
     </Header>
     <Content className="site-layout">
-      <div className="site-layout-background" style={{ padding: 24, minHeight: '90vh' }}>
+      <div className="site-layout-background" style={{ padding: 24, minHeight: '85vh' }}>
         <Router>
           <Switch>
             <Route exact path="/">

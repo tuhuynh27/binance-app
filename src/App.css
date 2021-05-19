@@ -15,3 +15,15 @@
     padding: 0 0;
     margin-top: 64px;
 }
+
+.ant-layout-header {
+    padding: 0 10px;
+    background: #12161C !important;
+}
+
+.logo {
+    float: left;
+    height: 48px;
+    margin: 8px 12px 8px 0;
+    background: rgba(255, 255, 255, 0.2);
+}
