@@ -25,12 +25,25 @@ export const watchListSlice = createSlice({
   reducers: {
     addWatchItem: (state, action) => {
       const newPair = action.payload
-      state.listWatch.push(newPair)
-      persistence.set('binance_listWatch', state.listWatch)
+      if (!state.listWatch.includes(newPair)) {
+        state.listWatch.push(newPair)
+        const newItem = {
+          stream: `${newPair.toLowerCase()}usdt@aggTrade`,
+          pair: newPair,
+          price: null,
+          high: null,
+          low: null,
+          volume: null,
+          change: null,
+        }
+        state.tableData.push(newItem)
+        persistence.set('binance_listWatch', state.listWatch)
+      }
     },
     setWatchItems: (state, action) => {
       const listWatch = action.payload
       state.listWatch = listWatch
+      state.tableData = state.tableData.filter(e => listWatch.includes(e.pair))
       persistence.set('binance_listWatch', state.listWatch)
     },
     updateTableData: (state, action) => {

@@ -57,7 +57,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list.length ? list : '--'}
+            {list.length ? list : '------'}
           </React.Fragment>
         )
       }
@@ -76,7 +76,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list.length ? list : '--'}
+            {list.length ? list : '------'}
           </React.Fragment>
         )
       }
@@ -85,6 +85,7 @@ function WatchTable() {
       title: '24h Change',
       dataIndex: 'highLow',
       key: 'highLow',
+      sorter: (a, b) => parseFloat(a.change) - parseFloat(b.change),
       render: (_, record) => {
         if (!record.change) {
           return (
@@ -113,8 +114,10 @@ function WatchTable() {
           )
         }
         const avg = (parseFloat(record.high) + parseFloat(record.low)) / 2
+        const val = (parseFloat(record.volume) * avg).toFixed(0)
+        const result = (val / 1000000).toFixed(2)
         return (
-          <React.Fragment>{(parseFloat(record.volume) * avg).toFixed(0) || 0}</React.Fragment>
+          <React.Fragment>{result ? '~' + result + 'M' : 0}</React.Fragment>
         )
       },
       responsive: ['md']
