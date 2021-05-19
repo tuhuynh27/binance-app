@@ -6,7 +6,7 @@ function buildInitialData(listWatch = []) {
   return listWatch.map(e => ({
     stream: `${e.toLowerCase()}usdt@aggTrade`,
     pair: e,
-    price: 0,
+    price: null,
     high: null,
     low: null,
     volume: null,

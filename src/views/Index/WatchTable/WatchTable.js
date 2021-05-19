@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { Button, Input, Table, Tag } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { Button, Input, Table, Tag, Spin } from 'antd'
+import { DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
 
 import { selectTableData, selectListWatch, addWatchItem, updateTableData, updateMetadata, removeWatchItem } from './watchListSlice'
 import { selectListHold } from '../HoldTable/holdListSlice'
 
 import { isUsingHash } from 'utils/hashParams'
+
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 function WatchTable() {
   const tableData = useSelector(selectTableData)
@@ -33,6 +35,13 @@ function WatchTable() {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
+      render: (_, record) => {
+        return (
+          <React.Fragment>
+            {record.price || <Spin indicator={antIcon} />}
+          </React.Fragment>
+        )
+      }
     },
     {
       title: 'PNL (%)',
@@ -76,22 +85,37 @@ function WatchTable() {
       title: '24h Change',
       dataIndex: 'highLow',
       key: 'highLow',
-      render: (_, record) => (
-        <React.Fragment>
+      render: (_, record) => {
+        if (!record.change) {
+          return (
+            <Spin indicator={antIcon} />
+          )
+        }
+        return (
+          <React.Fragment>
           <div>High: {record.high || 0}</div>
           <div>Low: {record.low || 0}</div>
           <div>Change: <span style={{ fontWeight: 'bold', color: record.change >= 0 ? 'green' : 'red' }}>{record.change || 0}%</span></div>
         </React.Fragment>
-      )
+        )
+      }
     },
     {
       title: '24h Volume ($)',
       dataIndex: 'volume',
       key: 'volume',
       sorter: (a, b) => parseFloat(a.volume) - parseFloat(b.volume),
-      render: (_, record) => (
-        <React.Fragment>{(record.volume * record.price).toFixed(0) || 0}</React.Fragment>
-      )
+      render: (_, record) => {
+        if (!record.volume) {
+          return (
+            <Spin indicator={antIcon} />
+          )
+        }
+        const avg = (parseFloat(record.high) + parseFloat(record.low)) / 2
+        return (
+          <React.Fragment>{(parseFloat(record.volume) * avg).toFixed(0) || 0}</React.Fragment>
+        )
+      }
     },
     ...!isUsingHash.check ? [{
       title: 'Action',
