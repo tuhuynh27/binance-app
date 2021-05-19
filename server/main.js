@@ -88,7 +88,7 @@ app.post('/holding', async function (req, res) {
     const assets = await getAccountInformation(apiKey, apiSecret)
     const data = await getHoldForAssets(assets, apiKey, apiSecret)
     res.send({
-      pairs: assets.map(e => e.pair),
+      pairs: data.map(e => e.pair),
       holds: data
     })
   } catch (err) {
