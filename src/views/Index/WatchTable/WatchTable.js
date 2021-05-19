@@ -60,7 +60,8 @@ function WatchTable() {
             {list.length ? list : '------'}
           </React.Fragment>
         )
-      }
+      },
+      responsive: ['md']
     },
     {
       title: 'PNL ($)',

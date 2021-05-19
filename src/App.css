@@ -31,3 +31,15 @@ body {
     margin: 8px 12px 8px 0;
     background: rgba(255, 255, 255, 0.2);
 }
+
+.drawer {
+    float: right;
+    height: 48px;
+    margin: 8px 0 8px 0;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+@media screen and (min-width: 500px) {
+    .drawer { display:none; }
+}
