@@ -1,12 +1,19 @@
+const WebSocket = require('ws')
+const axios = require('axios')
+const qs = require('querystring')
+const express = require('express')
+const cors = require('cors')
+const bodyParser = require('body-parser')
+
+let logs = []
+
 function monitor(e = 'BTC', threshold = 0.1) {
   console.log(`Started monitoring ${e} at a threshold ${threshold}`)
 
-  // Global vars
   let price = 0.0
   const prices = []
   let diffs = 0.0
 
-  const WebSocket = require('ws')
   const connectStr = `${e.toLowerCase()}usdt@aggTrade`
   const socket = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + connectStr)
 
@@ -42,7 +49,9 @@ function monitor(e = 'BTC', threshold = 0.1) {
       console.log('Big change: ' + diffs)
       const positive = `+${threshold * 10}%`
       const negative = `-${threshold * 10}%`
-      sendNotify(`${e} has just modifed ${diffs > 0 ? positive : negative}, current price is ${price}`)
+      const msg = `${e} has just modifed ${diffs > 0 ? positive : negative}, current price is ${price}`
+      logs.push(msg)
+      sendNotify(msg)
       diffs = 0
     }
   }, 1000)
@@ -57,9 +66,7 @@ function monitor(e = 'BTC', threshold = 0.1) {
   return { stopWatchers }
 }
 
-function sendNotify(msg, token = 'MFm1y1zojjw2BP7SY8lTymGrcYclaJmWw5PwbYuJ60C') {
-  const axios = require('axios')
-  const qs = require('querystring')
+async function sendNotify(msg, token = 'MFm1y1zojjw2BP7SY8lTymGrcYclaJmWw5PwbYuJ60C') {
   console.log(msg)
   const config = {
     headers: { Authorization: `Bearer ${token}` }
@@ -68,20 +75,60 @@ function sendNotify(msg, token = 'MFm1y1zojjw2BP7SY8lTymGrcYclaJmWw5PwbYuJ60C') 
     message: msg
   }
 
-  const { data } = axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config)
+  const { data } = await axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config)
   return data
 }
 
+// Global variable
+let listWatch = [
+  { name: 'ETH', threshold: 0.5 },
+  { name: 'BTC', threshold: 0.5 },
+]
+let stoppers = []
+
 // Start
 function main() {
-  const listWatch = [
-    { name: 'ADA', threshold: 0.1 },
-    { name: 'ETH', threshold: 0.1 },
-    { name: 'BTC', threshold: 0.1 },
-    { name: 'DOGE', threshold: 0.1 },
-  ]
+  stoppers = listWatch.map(e => {
+    const { stopWatchers } = monitor(e.name, e.threshold)
+    return stopWatchers
+  })
 
-  listWatch.forEach(e => monitor(e.name, e.threshold))
+  const app = express()
+  app.use(cors())
+  app.use(bodyParser.urlencoded({ extended: false }))
+  app.use(bodyParser.json())
+
+  app.get('/list', async function (_, res) {
+    res.send({ listWatch })
+  })
+
+  app.get('/logs', async function (_, res) {
+    res.send({ logs })
+  })
+
+  app.delete('/logs/clear', async function (_, res) {
+    logs = []
+    res.send({ message: 'Success' })
+  })
+
+  app.get('/setup', async function (req, res) {
+    listWatch = req.body.listWatch
+
+    stoppers.forEach(stopFn => stopFn())
+    stoppers = listWatch.map(e => {
+      const { stopWatchers } = monitor(e.name, e.threshold)
+      return stopWatchers
+    })
+
+    res.send({
+      message: 'Success'
+    })
+  })
+
+  const port = process.env.PORT || 8990
+  app.listen(port, () => {
+    console.log(`Binance watcher server listening at http://localhost:${port}`)
+  })
 }
 
 main()
