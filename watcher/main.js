@@ -7,7 +7,7 @@ const bodyParser = require('body-parser')
 
 let logs = []
 
-function monitor(e = 'BTC', threshold = 0.1) {
+function monitor(e = 'BTC', threshold = 1) {
   console.log(`Started monitoring ${e} at a threshold ${threshold}`)
 
   let price = 0.0
@@ -44,11 +44,11 @@ function monitor(e = 'BTC', threshold = 0.1) {
   // Watcher
   const watcher3 = setInterval(() => {
     // Big change
-    if (diffs > threshold || diffs < -threshold) {
+    if (diffs > (threshold / 10) || diffs < -(threshold / 10)) {
       // Send notify
       console.log('Big change: ' + diffs)
-      const positive = `+${threshold * 10}%`
-      const negative = `-${threshold * 10}%`
+      const positive = `+${threshold}%`
+      const negative = `-${threshold}%`
       const msg = `${e} has just modifed ${diffs > 0 ? positive : negative}, current price is ${price}`
       logs.push(msg)
       sendNotify(msg)
@@ -81,8 +81,8 @@ async function sendNotify(msg, token = 'MFm1y1zojjw2BP7SY8lTymGrcYclaJmWw5PwbYuJ
 
 // Global variable
 let listWatch = [
-  { name: 'ETH', threshold: 0.5 },
-  { name: 'BTC', threshold: 0.5 },
+  { name: 'ETH', threshold: 5 },
+  { name: 'BTC', threshold: 5 },
 ]
 let stoppers = []
 
@@ -126,7 +126,7 @@ function main() {
       })
     } catch(err) {
       res.status(400).send({
-        message: err.message
+        error: err.message
       })
     }
   })

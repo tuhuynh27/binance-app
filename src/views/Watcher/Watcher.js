@@ -1,24 +1,17 @@
 import './Watcher.css'
 import React, { useState, useEffect } from 'react'
 
-import { Table, List, Button, Input, notification } from 'antd'
+import { Table, Button, Input, notification } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 function Watcher() {
   const [tableData, setTableData] = useState([])
   const [isAdding, setIsAdding] = useState(false)
   const [text, setText] = useState('')
-  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     void getData()
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => getLogsData(), 2000)
-    return () => {
-      clearInterval(interval)
-    }
   }, [])
 
   const columns = [
@@ -42,15 +35,16 @@ function Watcher() {
   ]
 
   async function getData() {
-    const resp = await fetch('https://binance-watcher.tuhuynh.com/list')
-    const data = await resp.json()
-    setTableData(data.listWatch)
-  }
-
-  async function getLogsData() {
-    const resp = await fetch('https://binance-watcher.tuhuynh.com/logs')
-    const data = await resp.json()
-    setLogs(data.logs)
+    try {
+      setLoading(true)
+      const resp = await fetch('https://binance-watcher.tuhuynh.com/list')
+      const data = await resp.json()
+      setTableData(data.listWatch)
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleAdd() {
@@ -78,6 +72,7 @@ function Watcher() {
       ])
     }
     setText('')
+    setIsAdding(false)
   }
 
   function handleDelete(name) {
@@ -85,46 +80,44 @@ function Watcher() {
   }
 
   async function submitData() {
-    await fetch('https://binance-watcher.tuhuynh.com/setup', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ listWatch: tableData })
-    })
+    try {
+      setLoading(true)
+      
+      await fetch('https://binance-watcher.tuhuynh.com/setup', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ listWatch: tableData })
+      })
 
-    notification.success({
-      message: 'Success',
-      description: 'Done',
-    })
+      notification.success({
+        message: 'Success',
+        description: 'Done',
+      })
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <React.Fragment>
       <div className="watcher-container">
         <h1>Watcher</h1>
-        <Button onClick={() => setIsAdding(s => !s)} type={isAdding ? 'default' : 'primary'} style={{ marginBottom: '20px' }}>{isAdding ? 'Cancel' : 'Add/Update'}</Button>
+        <Button onClick={() => setIsAdding(s => !s)} type={isAdding ? 'default' : 'primary'} style={{ marginBottom: '20px' }}>{isAdding ? 'Cancel' : 'Add/Update'}</Button> <Button onClick={submitData}>Submit Data</Button>
+
         {isAdding && <Input
           value={text} onChange={e => setText(e.target.value)}
           onPressEnter={handleAdd}
           style={{ marginBottom: '20px' }} placeholder="ETH 0.1" />}
+
         <Table
           pagination={{ position: ['none', 'none'] }}
-          size="large" rowKey="name" columns={columns} dataSource={tableData}
-          style={{ marginBottom: '20px' }} />
-        <Button onClick={submitData}>Submit Data</Button>
-
-        <List
-          style={{ marginTop: '20px' }}
-          size="default"
-          bordered
-          dataSource={logs}
-          renderItem={(item, index) =>
-            <List.Item>
-              {item}
-            </List.Item>}
-        />
+          loading={loading}
+          size="large" rowKey="name" columns={columns} dataSource={tableData} />
       </div>
     </React.Fragment>
   )
