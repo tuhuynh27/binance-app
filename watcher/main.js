@@ -111,18 +111,24 @@ function main() {
     res.send({ message: 'Success' })
   })
 
-  app.get('/setup', async function (req, res) {
-    listWatch = req.body.listWatch
+  app.post('/setup', async function (req, res) {
+    try {
+      listWatch = req.body.listWatch
 
-    stoppers.forEach(stopFn => stopFn())
-    stoppers = listWatch.map(e => {
-      const { stopWatchers } = monitor(e.name, e.threshold)
-      return stopWatchers
-    })
+      stoppers.forEach(stopFn => stopFn())
+      stoppers = listWatch.map(e => {
+        const { stopWatchers } = monitor(e.name, e.threshold)
+        return stopWatchers
+      })
 
-    res.send({
-      message: 'Success'
-    })
+      res.send({
+        message: 'Success'
+      })
+    } catch(err) {
+      res.status(400).send({
+        message: err.message
+      })
+    }
   })
 
   const port = process.env.PORT || 8990

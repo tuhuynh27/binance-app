@@ -10,6 +10,7 @@ import {
 } from 'react-router-dom'
 
 import Index from './views/Index/Index'
+import Watcher from './views/Watcher/Watcher'
 
 import Logo from 'assets/img/logo.png'
 import DrawerIcon from 'assets/img/drawer.png'
@@ -43,6 +44,9 @@ function App() {
             <Switch>
               <Route exact path="/">
                 <Index />
+              </Route>
+              <Route exact patch="/watcher">
+                <Watcher />
               </Route>
             </Switch>
         </Router>
