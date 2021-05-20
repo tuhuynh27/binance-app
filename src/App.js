@@ -3,10 +3,13 @@ import React, { useState } from 'react'
 
 import { Layout, Drawer } from 'antd'
 
+import { LineChartOutlined, MonitorOutlined } from '@ant-design/icons'
+
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Link
 } from 'react-router-dom'
 
 import Index from './views/Index/Index'
@@ -26,21 +29,34 @@ function App() {
 
   return (
     <Layout>
-      <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
-        <img className="logo" src={Logo} alt="Logo" />
-        <img className="drawer" src={DrawerIcon} alt="Drawer" onClick={() => setDrawerVisible(true)} />
-      </Header>
-      <Drawer
-        title="Menu"
-        placement="right"
-        closable={false}
-        onClose={onDrawerClose}
-        visible={drawerVisible}>
-        <p>This feature is developing</p>
-      </Drawer>
-      <Content className="site-layout">
-        <div className="site-layout-background" style={{ padding: 24, minHeight: '85vh' }}>
-          <Router>
+      <Router>
+        <Header style={{ position: 'fixed', zIndex: 1, width: '100%', color: 'white' }}>
+          <Link to="/"><img className="logo" src={Logo} alt="Logo" /></Link>
+          <img className="drawer" src={DrawerIcon} alt="Drawer" onClick={() => setDrawerVisible(true)} />
+          <Link to="/" className="menu-item">Index</Link>
+          <Link to="/watcher" className="menu-item">Watcher</Link>
+        </Header>
+        <Drawer
+          placement="right"
+          width="232px"
+          bodyStyle={{
+            background: '#12161C',
+            padding: '12px'
+          }}
+          closable={false}
+          onClose={onDrawerClose}
+          visible={drawerVisible}>
+          <div className="mobile-menu-container">
+            <div className="mobile-menu-item">
+              <Link onClick={onDrawerClose} to="/"><LineChartOutlined /> Index</Link>
+            </div>
+            <div className="mobile-menu-item">
+              <Link onClick={onDrawerClose} to ="/watcher"><MonitorOutlined /> Watcher</Link>
+            </div>
+          </div>
+        </Drawer>
+        <Content className="site-layout">
+          <div className="site-layout-background" style={{ padding: 12, minHeight: '90vh' }}>
             <Switch>
               <Route exact path="/">
                 <Index />
@@ -49,15 +65,14 @@ function App() {
                 <Watcher />
               </Route>
             </Switch>
-        </Router>
-        </div>
-      </Content>
-      <Footer style={{ textAlign: 'center' }}>
-        <p><a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Github</a>
-          {' - '}
-          <a href="https://github.com/tuhuynh27/binance-app/issues/new" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Report Bug</a></p>
-        <p style={{ fontSize: '40px' }}>HODL</p>
-      </Footer>
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center', color: '#707A8A' }}>
+          <div>
+            Tu Huynh &copy; 2021 - <a style={{ color: 'white' }} href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer">Github</a>
+          </div>
+        </Footer>
+      </Router>
     </Layout>
   )
 }

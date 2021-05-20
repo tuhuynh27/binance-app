@@ -65,14 +65,14 @@ function HoldTable() {
         rowKey={(item) => item.pair + item.amount + item.price}
         renderItem={(item, index) =>
           <List.Item>
-            Holding {item.amount} {item.pair} at {item.price} USDT | Total: <strong>{(item.amount * item.price).toFixed(2)}</strong> USDT
+            Holding {item.amount} {item.pair} at {item.price} USDT, total: <strong>{(item.amount * item.price).toFixed(2)}</strong> USDT
             {!isUsingHash.check && <Popconfirm
               title="Are you sure?"
               onConfirm={() => handleDeleteHold(index)}
               okText="Yes"
               cancelText="No"
             >
-              <Button size="small" style={{ marginLeft: '0.5rem' }}>Sold</Button>
+              <Button style={{ marginLeft: '0.5rem' }}>Sold</Button>
             </Popconfirm>}
           </List.Item>}
         header={<Statistic title="Holding Balance (USDT)" value={calcHoldingBalance()} precision={2} />}

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { Table, Button, Input, notification } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
+import LineNotify from 'assets/img/line_notify.jpg'
+
 function Watcher() {
   const [tableData, setTableData] = useState([])
   const [isAdding, setIsAdding] = useState(false)
@@ -23,7 +25,10 @@ function Watcher() {
     {
       title: 'Threshold',
       dataIndex: 'threshold',
-      key: 'threshold'
+      key: 'threshold',
+      render: (_, record) => (
+        <React.Fragment>{record.threshold}%</React.Fragment>
+      )
     },
     {
       title: '',
@@ -82,7 +87,7 @@ function Watcher() {
   async function submitData() {
     try {
       setLoading(true)
-      
+
       await fetch('https://binance-watcher.tuhuynh.com/setup', {
         method: 'POST',
         headers: {
@@ -107,7 +112,8 @@ function Watcher() {
     <React.Fragment>
       <div className="watcher-container">
         <h1>Watcher</h1>
-        <Button onClick={() => setIsAdding(s => !s)} type={isAdding ? 'default' : 'primary'} style={{ marginBottom: '20px' }}>{isAdding ? 'Cancel' : 'Add/Update'}</Button> <Button onClick={submitData}>Submit Data</Button>
+        <Button onClick={() => setIsAdding(s => !s)} type={isAdding ? 'default' : 'primary'} style={{ marginBottom: '20px' }}>{isAdding ? 'Cancel' : 'Add/Update'}</Button>
+        &nbsp; <Button onClick={submitData} loading={loading}>Submit Data</Button>
 
         {isAdding && <Input
           value={text} onChange={e => setText(e.target.value)}
@@ -117,7 +123,13 @@ function Watcher() {
         <Table
           pagination={{ position: ['none', 'none'] }}
           loading={loading}
+          style={{ marginBottom: '20px' }}
           size="large" rowKey="name" columns={columns} dataSource={tableData} />
+
+        <p style={{ textAlign: 'center' }}>Watcher setup for LINE Notify</p>
+        <p>
+          <img style={{ maxWidth: '100%' }} src={LineNotify} alt="LINE Notify" />
+        </p>
       </div>
     </React.Fragment>
   )

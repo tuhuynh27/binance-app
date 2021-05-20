@@ -40,10 +40,6 @@ function Index() {
 
   return (
     <React.Fragment>
-      <div className="index-header">
-        {!isUsingHash.check && <Button type="primary" size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
-        {isUsingHash.check && <Button type="primary" size="large" onClick={createYourList}>Create your own list</Button>}
-      </div>
       <Modal title="Share your list" visible={shareToggle}
              onOk={() => { copyShareUrl().then(() => setShareToggle(false)); }}
              okText="Copy to clipboard"
@@ -63,6 +59,10 @@ function Index() {
         </Space>
       </Modal>
       <div className="index-container">
+        <div className="index-header">
+          {!isUsingHash.check && <Button size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
+          {isUsingHash.check && <Button size="large" onClick={createYourList}>Create your own list</Button>}
+        </div>
         <h1>Watch List</h1>
         <WatchTable/>
         <Divider dashed={true} />

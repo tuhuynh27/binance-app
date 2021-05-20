@@ -114,7 +114,7 @@ function Import() {
           onConfirm={handleDelete}
           okText="Yes"
           cancelText="No">
-            <Button type="dashed" style={{ marginBottom: '10px', marginLeft: '10px' }}>Delete API Key</Button>
+            <Button type="dashed" style={{ marginBottom: '10px', marginLeft: '10px' }}>Delete</Button>
         </Popconfirm>}
       <Modal title="Enter Binance API Key" visible={isModalOpen} onOk={handleSave} onCancel={() => setIsModalOpen(false)}>
         <p>Please visit <a href="https://www.binance.com/en/my/settings/api-management" target="_blank" rel="noreferrer">here</a> to setup Binance API. After created API, please <strong>only Enable Reading</strong> as show below.</p>
