@@ -1,16 +1,24 @@
 import './Watcher.css'
 import React, { useState, useEffect } from 'react'
 
-import { Table, Button, Input, notification } from 'antd'
+import { Table, List, Button, Input, notification } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 
 function Watcher() {
   const [tableData, setTableData] = useState([])
   const [isAdding, setIsAdding] = useState(false)
   const [text, setText] = useState('')
+  const [logs, setLogs] = useState([])
 
   useEffect(() => {
     void getData()
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => getLogsData(), 2000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [])
 
   const columns = [
@@ -37,6 +45,12 @@ function Watcher() {
     const resp = await fetch('https://binance-watcher.tuhuynh.com/list')
     const data = await resp.json()
     setTableData(data.listWatch)
+  }
+
+  async function getLogsData() {
+    const resp = await fetch('https://binance-watcher.tuhuynh.com/logs')
+    const data = await resp.json()
+    setLogs(data.logs)
   }
 
   function handleAdd() {
@@ -100,6 +114,17 @@ function Watcher() {
           size="large" rowKey="name" columns={columns} dataSource={tableData}
           style={{ marginBottom: '20px' }} />
         <Button onClick={submitData}>Submit Data</Button>
+
+        <List
+          style={{ marginTop: '20px' }}
+          size="default"
+          bordered
+          dataSource={logs}
+          renderItem={(item, index) =>
+            <List.Item>
+              {item}
+            </List.Item>}
+        />
       </div>
     </React.Fragment>
   )
