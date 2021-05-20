@@ -55,7 +55,7 @@ function HoldTable() {
       />}
       {!isUsingHash.check &&
         <div>
-          <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '10px' }}>Add</Button>
+          <Button type="primary" onClick={() => setIsHoldAdding(true)} style={{ marginBottom: '20px' }}>Add</Button>
           <Import />
         </div>}
       <List

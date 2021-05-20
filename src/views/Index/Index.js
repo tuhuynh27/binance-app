@@ -63,10 +63,10 @@ function Index() {
         </Space>
       </Modal>
       <div className="index-container">
-        <h2>Watch List</h2>
+        <h1>Watch List</h1>
         <WatchTable/>
         <Divider dashed={true} />
-        <h2>Hold List</h2>
+        <h1>Hold List</h1>
         <HoldTable />
       </div>
     </React.Fragment>

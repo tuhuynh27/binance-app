@@ -1,17 +1,10 @@
 #root {
-    background: rgba(255, 255, 255, 0.2);
+    background: #0B0E11;
 }
 
 body {
+    background: #0B0E11 !important;
     touch-action: pan-y;
-}
-
-#components-layout-demo-fixed .logo {
-    float: left;
-    width: 120px;
-    height: 31px;
-    margin: 16px 24px 16px 0;
-    background: rgba(255, 255, 255, 0.2);
 }
 
 .site-layout .site-layout-background {
@@ -23,6 +16,11 @@ body {
 .ant-layout-header {
     padding: 0 10px;
     background: #12161C !important;
+}
+
+.ant-layout-footer {
+    background: #0B0E11;
+    color: white;
 }
 
 .logo {
@@ -42,4 +40,14 @@ body {
 
 @media screen and (min-width: 500px) {
     .drawer { display:none; }
+}
+
+.ant-table, .ant-list {
+    border: 0;
+    box-shadow: 0px 0px 20px rgb(0 0 0 / 8%);
+}
+
+.ant-table-thead > tr > th, .ant-table-footer {
+    color: #707A8A;
+    background: white;
 }

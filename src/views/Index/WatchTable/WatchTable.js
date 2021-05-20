@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { Button, Input, Table, Tag, Spin } from 'antd'
+import { Button, Input, Table, Spin } from 'antd'
 import { DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
 
 import { selectTableData, selectListWatch, addWatchItem, updateTableData, updateMetadata, removeWatchItem } from './watchListSlice'
@@ -22,12 +22,12 @@ function WatchTable() {
 
   const columns = [
     {
-      title: '',
+      title: 'Name',
       dataIndex: 'pair',
       key: 'pair',
       render: (_, record) => (
         <a href={`https://www.binance.com/en/trade/${record.pair}_USDT?type=spot`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
-          <Tag color={record.change >= 0 ? 'green' : 'red'}>{record.pair}</Tag>
+          <span style={{ fontWeight: 400, fontSize: '18px' }}>{record.pair}</span>
         </a>
       ),
     },
@@ -57,7 +57,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list.length ? list : '------'}
+            {list.length ? list : '--'}
           </React.Fragment>
         )
       },
@@ -77,7 +77,7 @@ function WatchTable() {
         })
         return (
           <React.Fragment>
-            {list.length ? list : '------'}
+            {list.length ? list : '--'}
           </React.Fragment>
         )
       }
@@ -196,18 +196,20 @@ function WatchTable() {
   return (
     <React.Fragment>
       {!isUsingHash.check &&
-        <p>
+        <div style={{ marginBottom: '20px' }}>
           <Button type={isAdding ? 'default' : 'primary'} onClick={() => {setIsAdding(state => !state)}}>
             { isAdding ? 'Cancel' : 'Add'}
           </Button>
-        </p>}
+        </div>}
       {isAdding &&
-        <p>
+        <div style={{ marginBottom: '20px' }}>
           <Input value={newPair} onChange={e => setNewPair(e.target.value)} onPressEnter={handleAddWatch} placeholder="Enter to add"/>
-        </p>}
+        </div>}
       <Table
-        scroll={{ scrollToFirstRowOnChange: 'false', x: 'max-content', y: 1000 }}
         pagination={{ position: ['none', 'none'] }}
+        footer={() => {
+          return (<div style={{ textAlign: 'center', cursor: 'pointer' }}>View more markets</div>)
+        }}
         size="large" rowKey="stream" columns={columns} dataSource={tableData} />
     </React.Fragment>
   )

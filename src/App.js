@@ -11,7 +11,6 @@ import {
 
 import Index from './views/Index/Index'
 
-import Argg from 'assets/img/argg.gif'
 import Logo from 'assets/img/logo.png'
 import DrawerIcon from 'assets/img/drawer.png'
 
@@ -36,7 +35,7 @@ function App() {
         closable={false}
         onClose={onDrawerClose}
         visible={drawerVisible}>
-        <p>This feature is dev</p>
+        <p>This feature is developing</p>
       </Drawer>
       <Content className="site-layout">
         <div className="site-layout-background" style={{ padding: 24, minHeight: '85vh' }}>
@@ -50,9 +49,10 @@ function App() {
         </div>
       </Content>
       <Footer style={{ textAlign: 'center' }}>
-        <p>[<a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Github</a>]
-          [<a href="https://github.com/tuhuynh27/binance-app/issues/new" target="_blank" rel="noreferrer" style={{ color: 'black' }}>Report Bug</a>]</p>
-        <p>&copy; 2021 Tu Huynh - Hold to dieee <img src={Argg} alt="Argg" style={{ maxWidth: '30px' }}/> </p>
+        <p><a href="https://github.com/tuhuynh27/binance-app" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Github</a>
+          {' - '}
+          <a href="https://github.com/tuhuynh27/binance-app/issues/new" target="_blank" rel="noreferrer" style={{ color: 'white' }}>Report Bug</a></p>
+        <p style={{ fontSize: '40px' }}>HODL</p>
       </Footer>
     </Layout>
   )
