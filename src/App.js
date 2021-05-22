@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 
 import { Layout, Drawer } from 'antd'
 
-import { LineChartOutlined, MonitorOutlined } from '@ant-design/icons'
+import { LineChartOutlined, MonitorOutlined, RobotOutlined } from '@ant-design/icons'
 
 import {
   BrowserRouter as Router,
@@ -14,6 +14,7 @@ import {
 
 import Index from './views/Index/Index'
 import Watcher from './views/Watcher/Watcher'
+import Trade from './views/Trade/Trade'
 
 import Logo from 'assets/img/logo.png'
 import DrawerIcon from 'assets/img/drawer.png'
@@ -35,6 +36,7 @@ function App() {
           <img className="drawer" src={DrawerIcon} alt="Drawer" onClick={() => setDrawerVisible(true)} />
           <Link to="/" className="menu-item">Index</Link>
           <Link to="/watcher" className="menu-item">Watcher</Link>
+          <Link to="/trade" className="menu-item">Trade</Link>
         </Header>
         <Drawer
           placement="right"
@@ -53,6 +55,9 @@ function App() {
             <div className="mobile-menu-item">
               <Link onClick={onDrawerClose} to ="/watcher"><MonitorOutlined /> Watcher</Link>
             </div>
+            <div className="mobile-menu-item">
+              <Link onClick={onDrawerClose} to ="/trade"><RobotOutlined /> Trade</Link>
+            </div>
           </div>
         </Drawer>
         <Content className="site-layout">
@@ -61,8 +66,11 @@ function App() {
               <Route exact path="/">
                 <Index />
               </Route>
-              <Route exact patch="/watcher">
+              <Route path="/watcher">
                 <Watcher />
+              </Route>
+              <Route path="/trade">
+                <Trade />
               </Route>
             </Switch>
           </div>
