@@ -10,6 +10,7 @@ const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 function Trade() {
   const [logs, setLogs] = useState([])
+  const [rate, setRate] = useState({})
   const [info, setInfo] = useState({})
   const [configs, setConfigs] = useState({})
   const [loading, setLoading] = useState(false)
@@ -17,6 +18,7 @@ function Trade() {
   const loadData = useCallback(async () => {
     await getInfo()
     await getLogs()
+    await getRate()
     await getConfig()
   }, [])
 
@@ -57,6 +59,19 @@ function Trade() {
     }
   }
 
+  async function getRate() {
+    try {
+      setLoading(true)
+      const resp = await fetch('https://trade.tuhuynh.com/trade/logs/rate')
+      const data = await resp.json()
+      setRate(data)
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function getConfig() {
     try {
       setLoading(true)
@@ -70,10 +85,6 @@ function Trade() {
     }
   }
 
-  const win = logs.filter(e => e.startsWith('Take profit')).length
-  const lose = logs.filter(e => e.startsWith('Stop loss')).length
-  const open = logs.filter(e => e.endsWith('open trading time')).length
-
   return (
     <React.Fragment>
       <div className="trade-container">
@@ -81,9 +92,8 @@ function Trade() {
         <Spin spinning={loading} delay={1000}>
           <div>
             <p>Funds: {info.initialBalance} USDT</p>
-            <p>Positions opened: {open}</p>
             <p>Transactions: {info.txCount}</p>
-            <p>Win/Lose: {win} / {lose}</p>
+            <p>Win/Lose: {rate.win} / {rate.lose}</p>
             <p>Profit: <strong>{info.profit ? info.profit.toFixed(2) : 0}</strong> USDT (<strong>{(info.profit / info.initialBalance * 100).toFixed(2)}</strong>%)</p>
             <p>Configs:</p>
             <ul>
