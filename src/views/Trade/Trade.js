@@ -22,7 +22,7 @@ function Trade() {
   useEffect(() => {
     const interval = setInterval(() => {
       loadData()
-    }, 3000)
+    }, 1000)
 
     return () => {
       clearInterval(interval)
@@ -70,14 +70,20 @@ function Trade() {
     }
   }
 
+  function calcTxPerSecond() {
+    if (!info.startTime || !info.txCount) return 0
+    const sec = (new Date().getTime() - info.startTime - 10000) / 1000
+    return (info.txCount / sec).toFixed(2)
+  }
+
   return (
     <React.Fragment>
       <div className="trade-container">
         <h1>Trade Bot Battle <Spin style={{ marginLeft: '20px' }} indicator={antIcon} /></h1>
         <div>
           <p>Funds: {info.initialBalance || 0} USDT</p>
-          <p>Transactions: {info.txCount || 0}</p>
-          <p>Win/Lose: {rate.win || 0} / {rate.lose || 0} (Rate: {(rate.win / (rate.win + rate.lose) * 100).toFixed(2)}%)</p>
+          <p>Transactions: {info.txCount || 0} ({calcTxPerSecond()} transactions/s)</p>
+          <p>Win/Lose: {rate.win || 0} / {rate.lose || 0} (Win rate: {(rate.win / (rate.win + rate.lose) * 100).toFixed(2)}%)</p>
           <p>Profit: <strong>{info.profit ? info.profit.toFixed(2) : 0}</strong> USDT (<strong>{(info.profit / info.initialBalance * 100).toFixed(2)}</strong>%)</p>
           <p>Market status: Neutral</p>
           <p>Auto adjust algorithm: Disabled</p>
