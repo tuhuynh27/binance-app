@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Spin, Button } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons'
 
+import dayjs from 'dayjs'
+
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 function Trade() {
@@ -73,31 +75,36 @@ function Trade() {
       <div className="trade-container">
         <h1>Trade Bot Battle <Spin style={{ marginLeft: '20px' }} indicator={antIcon} /></h1>
         <div>
-          <p>Funds: {info.initialBalance} USDT</p>
-          <p>Transactions: {info.txCount}</p>
-          <p>Win/Lose: {rate.win} / {rate.lose} (Rate: {(rate.win / (rate.win + rate.lose)).toFixed(2)}%)</p>
+          <p>Funds: {info.initialBalance || 0} USDT</p>
+          <p>Transactions: {info.txCount || 0}</p>
+          <p>Win/Lose: {rate.win || 0} / {rate.lose || 0} (Rate: {(rate.win / (rate.win + rate.lose) * 100).toFixed(2)}%)</p>
           <p>Profit: <strong>{info.profit ? info.profit.toFixed(2) : 0}</strong> USDT (<strong>{(info.profit / info.initialBalance * 100).toFixed(2)}</strong>%)</p>
           <p>Market status: Neutral</p>
           <p>Auto adjust algorithm: Disabled</p>
           <p>Configs <Button size="small" style={{ marginLeft: '5px' }}>Update</Button></p>
           <ul>
-            <li>Dip Threshold: {configs.dipDownThreshold}%</li>
-            <li>Up Trend Threshold: {configs.dipUpThreshold}%</li>
-            <li>Deny Dip: {configs.denyDipDown}%</li>
-            <li>Start To Buy: {configs.startToBuy}%</li>
-            <li>Stop Loss: {configs.stopLoss}%</li>
-            <li>Take Profit: {configs.takeProfit}%</li>
+            <li>Dip Threshold: {configs.dipDownThreshold || 0}%</li>
+            <li>Up Trend Threshold: {configs.dipUpThreshold || 0}%</li>
+            <li>Deny Dip: {configs.denyDipDown || 0}%</li>
+            <li>Start To Buy: {configs.startToBuy || 0}%</li>
+            <li>Stop Loss: {configs.stopLoss|| 0}%</li>
+            <li>Take Profit: {configs.takeProfit || 0}%</li>
           </ul>
         </div>
         <div className="log-table">
-          {logs.map((l, i) => {
+          {logs.map((e, i) => {
+            const l = e.msg
             let status = 'black'
             if (l.startsWith('Stop loss ')) {
               status = 'red'
             } else if (l.startsWith('Take profit ')) {
               status = 'green'
             }
-            return (<p key={i} style={{ color: status, fontWeight: status === 'red' || status === 'green' ? 'bold' : 'normal' }}>{l}</p>)
+            const time = dayjs(e.time).format('HH:mm:ss')
+            return (
+              <p key={i} style={{ color: status, fontWeight: status === 'red' || status === 'green' ? 'bold' : 'normal' }}>
+                [{time}] {l}
+              </p>)
           })}
         </div>
       </div>
