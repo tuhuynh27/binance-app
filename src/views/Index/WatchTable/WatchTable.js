@@ -129,6 +129,7 @@ function WatchTable() {
       render: (_, record) => (
         <Button onClick={() => handleDeleteWatch(record.pair)} icon={<DeleteOutlined />} />
       ),
+      responsive: ['md'],
     }] : []
   ]
 

@@ -63,6 +63,7 @@ function HoldTable() {
         bordered
         dataSource={listHold}
         rowKey={(item) => item.pair + item.amount + item.price}
+        style={{ marginBottom: '20px' }}
         renderItem={(item, index) =>
           <List.Item>
             Holding {item.amount} {item.pair} at {item.price} USDT, total: <strong>{(item.amount * item.price).toFixed(2)}</strong> USDT
