@@ -102,7 +102,7 @@ function Trade() {
           <p>Funds: {info.initialBalance || 0} USDT</p>
           <p>Transactions: {info.txCount || 0} ({calcTxPerSecond()} transactions/s)</p>
           <p>Win/Lose: {rate.win || 0} / {rate.lose || 0} (Win rate: {(rate.win / (rate.win + rate.lose) * 100).toFixed(2)}%)</p>
-          <p>Profit: <strong>{info.profit ? info.profit.toFixed(2) : 0}</strong> USDT (<strong>{(info.profit / info.initialBalance * 100).toFixed(2)}</strong>%)</p>
+          <p>Profit: <strong>{info.profit ? info.profit.toFixed(2) * -1 : 0}</strong> USDT (<strong>{(info.profit / info.initialBalance * 100).toFixed(2) * -1}</strong>%)</p>
           <p>Market status: <span style={{ fontWeight: 'bold', color: 'red' }}>Downtrend</span></p>
           <p>Auto adjust algorithm: Disabled</p>
           <p>Configs <Button size="small" style={{ marginLeft: '5px' }}>Update</Button></p>
