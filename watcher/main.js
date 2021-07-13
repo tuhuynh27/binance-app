@@ -66,7 +66,7 @@ function monitor(e = 'BTC', threshold = 1) {
   return { stopWatchers }
 }
 
-async function sendNotify(msg, token = 'MFm1y1zojjw2BP7SY8lTymGrcYclaJmWw5PwbYuJ60C') {
+async function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') {
   console.log(msg)
   const config = {
     headers: { Authorization: `Bearer ${token}` }
