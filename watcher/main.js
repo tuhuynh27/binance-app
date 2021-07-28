@@ -14,14 +14,24 @@ function monitor(e = 'BTC', threshold = 1) {
   const prices = []
   let diffs = 0.0
 
-  const connectStr = `${e.toLowerCase()}usdt@aggTrade`
-  const socket = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + connectStr)
+  let socket = null
 
-  socket.on('message', raw => {
-    const data = JSON.parse(raw).data
-    const priceUpdate = parseFloat(data.p)
-    price = priceUpdate
-  })
+  function connect() {
+    const connectStr = `${e.toLowerCase()}usdt@aggTrade`
+    socket = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + connectStr)
+
+    socket.on('message', raw => {
+      const data = JSON.parse(raw).data
+      price = parseFloat(data.p)
+    })
+
+    socket.onclose = function (e) {
+      console.log(`Socket ${connectStr} is closed, reconnecting...`)
+      setTimeout(() => connect(), 1000)
+    }
+  }
+
+  connect()
 
   const watcher1 = setInterval(() => {
     if (prices.length > 10) {
