@@ -13,6 +13,7 @@ function monitor(e = 'BTC', threshold = 1) {
   let price = 0.0
   const prices = []
   let diffs = 0.0
+  let combo = 0
 
   let socket = null
 
@@ -27,6 +28,7 @@ function monitor(e = 'BTC', threshold = 1) {
 
     socket.onclose = function (e) {
       console.log(`Socket ${connectStr} is closed, reconnecting...`)
+      sendNotify(`Socket ${connectStr} is closed, reconnecting...`)
       setTimeout(() => connect(), 1000)
     }
   }
@@ -59,9 +61,20 @@ function monitor(e = 'BTC', threshold = 1) {
       console.log('Big change: ' + diffs)
       const positive = `+${threshold}%`
       const negative = `-${threshold}%`
-      const msg = `${e} has just modifed ${diffs > 0 ? positive : negative}, current price is ${price}`
+      const msg = `${e} has just modified ${diffs > 0 ? positive : negative}, current price is ${price}`
+      combo += threshold > 0 ? 1 : -1
       logs.push(msg)
       sendNotify(msg)
+      if (combo >= 3) {
+        const comboMsg = `${e} is having a bull-run!`
+        sendNotify(comboMsg)
+        combo = 0
+      }
+      if (combo <= -3) {
+        const comboMsg = `${e} is crashing!`
+        sendNotify(comboMsg)
+        combo = 0
+      }
       diffs = 0
     }
   }, 1000)
@@ -98,6 +111,8 @@ let stoppers = []
 
 // Start
 function main() {
+  sendNotify('New watcher deployment')
+
   stoppers = listWatch.map(e => {
     const { stopWatchers } = monitor(e.name, e.threshold)
     return stopWatchers
@@ -126,10 +141,17 @@ function main() {
       listWatch = req.body.listWatch
 
       stoppers.forEach(stopFn => stopFn())
-      stoppers = listWatch.map(e => {
-        const { stopWatchers } = monitor(e.name, e.threshold)
-        return stopWatchers
-      })
+
+      sendNotify('Applying new changes...')
+
+      setTimeout(() => {
+        stoppers = listWatch.map(e => {
+          const { stopWatchers } = monitor(e.name, e.threshold)
+          return stopWatchers
+        })
+
+        sendNotify('Done!')
+      }, 1000)
 
       res.send({
         message: 'Success'
