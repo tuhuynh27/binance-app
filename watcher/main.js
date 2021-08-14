@@ -83,7 +83,7 @@ function monitor(e = 'BTC', threshold = 1) {
     clearInterval(watcher1)
     clearInterval(watcher2)
     clearInterval(watcher3)
-    socket.kill()
+    socket.terminate()
   }
 
   return { stopWatchers }
