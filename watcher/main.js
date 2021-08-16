@@ -28,8 +28,8 @@ function monitor(e = 'BTC', threshold = 1) {
 
     socket.onclose = function (e) {
       console.log(`Socket ${connectStr} is closed, reconnecting...`)
-      sendNotify(`Socket ${connectStr} is closed, reconnecting...`)
-      setTimeout(() => connect(), 1000)
+      sendNotify(`Socket for ${e} is closed, reconnecting...`)
+      setTimeout(() => connect(), 5000)
     }
   }
 
@@ -55,6 +55,10 @@ function monitor(e = 'BTC', threshold = 1) {
 
   // Watcher
   const watcher3 = setInterval(() => {
+    if (prices.length < 10) {
+      return
+    }
+
     // Big change
     if (diffs > (threshold / 10) || diffs < -(threshold / 10)) {
       // Send notify
@@ -90,7 +94,7 @@ function monitor(e = 'BTC', threshold = 1) {
   return { stopWatchers }
 }
 
-async function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') {
+function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') {
   console.log(msg)
   const config = {
     headers: { Authorization: `Bearer ${token}` }
@@ -99,8 +103,7 @@ async function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7
     message: msg
   }
 
-  const { data } = await axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config)
-  return data
+  axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config).catch(err => console.error(err))
 }
 
 // Global variable
@@ -152,7 +155,7 @@ function main() {
         })
 
         sendNotify('Done!')
-      }, 1000)
+      }, 5000)
 
       res.send({
         message: 'Success'
