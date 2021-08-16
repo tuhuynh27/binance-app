@@ -109,7 +109,7 @@ function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') 
     message: msg
   }
 
-  // axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config).catch(err => console.error(err))
+  axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config).catch(err => console.error(err))
 }
 
 // Global variable
