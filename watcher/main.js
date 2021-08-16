@@ -6,6 +6,9 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 
 let logs = []
+const appState = {
+  isReloading: false
+}
 
 function monitor(e = 'BTC', threshold = 1) {
   console.log(`Started monitoring ${e} at a threshold ${threshold}`)
@@ -62,7 +65,6 @@ function monitor(e = 'BTC', threshold = 1) {
     // Big change
     if (diffs > (threshold / 10) || diffs < -(threshold / 10)) {
       // Send notify
-      console.log('Big change: ' + diffs)
       const positive = `+${threshold}%`
       const negative = `-${threshold}%`
       const msg = `${e} has just modified ${diffs > 0 ? positive : negative}, current price is ${price}`
@@ -95,6 +97,10 @@ function monitor(e = 'BTC', threshold = 1) {
 }
 
 function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') {
+  if (appState.isReloading) {
+    return
+  }
+
   console.log(msg)
   const config = {
     headers: { Authorization: `Bearer ${token}` }
@@ -103,7 +109,7 @@ function sendNotify(msg, token = 'MHbsBarmcB59Np5Uz0WNW1DSiNpiDAPiMsDohkH7lTA') 
     message: msg
   }
 
-  axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config).catch(err => console.error(err))
+  // axios.post('https://notify-api.line.me/api/notify', qs.stringify(obj), config).catch(err => console.error(err))
 }
 
 // Global variable
@@ -115,7 +121,7 @@ let stoppers = []
 
 // Start
 function main() {
-  sendNotify('New watcher deployment')
+  sendNotify('New deployment!')
 
   stoppers = listWatch.map(e => {
     const { stopWatchers } = monitor(e.name, e.threshold)
@@ -142,6 +148,7 @@ function main() {
 
   app.post('/setup', async function (req, res) {
     try {
+      appState.isReloading = true
       listWatch = req.body.listWatch
 
       stoppers.forEach(stopFn => stopFn())
@@ -155,7 +162,11 @@ function main() {
         })
 
         sendNotify('Done!')
-      }, 5000)
+      }, 1000)
+
+      setTimeout(() => {
+        appState.isReloading = false
+      }, 30000)
 
       res.send({
         message: 'Success'
