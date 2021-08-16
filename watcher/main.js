@@ -148,7 +148,6 @@ function main() {
 
   app.post('/setup', async function (req, res) {
     try {
-      appState.isReloading = true
       listWatch = req.body.listWatch
 
       stoppers.forEach(stopFn => stopFn())
@@ -162,11 +161,12 @@ function main() {
         })
 
         sendNotify('Done!')
-      }, 1000)
+        appState.isReloading = true
 
-      setTimeout(() => {
-        appState.isReloading = false
-      }, 30000)
+        setTimeout(() => {
+          appState.isReloading = false
+        }, 30000)
+      }, 1000)
 
       res.send({
         message: 'Success'
