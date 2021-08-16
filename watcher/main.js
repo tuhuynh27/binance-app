@@ -62,7 +62,7 @@ function monitor(e = 'BTC', threshold = 1) {
       const positive = `+${threshold}%`
       const negative = `-${threshold}%`
       const msg = `${e} has just modified ${diffs > 0 ? positive : negative}, current price is ${price}`
-      combo += threshold > 0 ? 1 : -1
+      combo += diffs > 0 ? 1 : -1
       logs.push(msg)
       sendNotify(msg)
       if (combo >= 3) {
