@@ -6,8 +6,9 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 
 let logs = []
+let listSockets = []
 const appState = {
-  isReloading: false
+  isReloading: false,
 }
 
 function monitor(e = 'BTC', threshold = 1) {
@@ -20,18 +21,31 @@ function monitor(e = 'BTC', threshold = 1) {
 
   let socket = null
 
+  const connectStr = `${e.toLowerCase()}usdt@aggTrade`
   function connect() {
-    const connectStr = `${e.toLowerCase()}usdt@aggTrade`
     socket = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + connectStr)
+    if (listSockets.find(el => el.name === connectStr)) {
+      listSockets.find(el => el.name === connectStr).status = 'UP'
+    } else {
+      listSockets.push({
+        name: connectStr,
+        status: 'UP'
+      })
+    }
 
     socket.on('message', raw => {
       const data = JSON.parse(raw).data
       price = parseFloat(data.p)
     })
 
+    socket.onerror = function(e) {
+      sendNotify(`Socket ${connectStr} error observed: ${e}`)
+      listSockets.find(el => el.name === connectStr).status = 'DOWN'
+    }
+
     socket.onclose = function (e) {
-      console.log(`Socket ${connectStr} is closed, reconnecting...`)
-      sendNotify(`Socket for ${e} is closed, reconnecting...`)
+      listSockets.find(el => el.name === connectStr).status = 'DOWN'
+      sendNotify(`Socket for ${connectStr} is closed, reconnecting...`)
       setTimeout(() => connect(), 5000)
     }
   }
@@ -86,6 +100,7 @@ function monitor(e = 'BTC', threshold = 1) {
   }, 1000)
 
   function stopWatchers() {
+    listSockets.find(el => el.name === connectStr).status = 'DOWN'
     clearInterval(watcher1)
     clearInterval(watcher2)
     clearInterval(watcher3)
@@ -146,11 +161,24 @@ function main() {
     res.send({ message: 'Success' })
   })
 
+  app.get('/health', (req, res) => {
+    res.send({
+      server: 'UP',
+      streams: listSockets
+    })
+  })
+
+  app.get('/die', (req, res) => {
+    stoppers.forEach(stopFn => stopFn())
+    res.send('OK')
+  })
+
   app.post('/setup', async function (req, res) {
     try {
       listWatch = req.body.listWatch
 
       stoppers.forEach(stopFn => stopFn())
+      listSockets = []
 
       sendNotify('Applying new changes...')
 
