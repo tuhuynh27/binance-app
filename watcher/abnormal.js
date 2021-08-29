@@ -112,6 +112,11 @@ async function monitorAbnormalTradingNotices() {
     let message = `<a href='${coinmarketcapMap[data.baseAsset]?.url || '#'}'>${data.baseAsset}</a> <i>(#${coinmarketcapMap[data.baseAsset]?.rank || '0'})</i>`;
     let noti = false;
 
+    // Only notify for top 30 coin
+    if (parseInt(coinmarketcapMap[data.baseAsset]?.rank) >= 30) {
+      return
+    }
+
     if (['MINUTE_5', 'HOUR_2'].includes(data.period)) {
       if (pumpCheck[data.baseAsset] === undefined || pumpCheck[data.baseAsset] <= 0) {
         pumpCheck[data.baseAsset] = 0;
