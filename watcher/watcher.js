@@ -9,7 +9,13 @@ const channelChatId = process.env.TELEGRAM_PC_CHAT_ID
 
 const uri = `https://api.telegram.org/bot${telegramBotKey}`
 
+const appState = {
+  updating: false
+}
+
 function notify(text) {
+  if (appState.updating) return
+
   fetch(`${uri}/sendMessage`, {
     method: 'POST',
     headers: {
@@ -152,6 +158,13 @@ function main() {
     stopper: monitor(e.name, e.threshold)
   }))
 
+  function applyUpdatingState() {
+    appState.updating = true
+    setTimeout(() => {
+      appState.updating = false
+    }, 5000)
+  }
+
   // Declare a route
   fastify.post('/', async function (request, reply) {
     if (request.body?.message?.text?.startsWith('/add ')) {
@@ -169,12 +182,14 @@ function main() {
           watchList[foundAt].stopper.stopWatchers()
           watchList[foundAt].threshold = parseFloat(threshold)
           watchList[foundAt].stopper = monitor(name, threshold)
+          applyUpdatingState()
           replyTo(request.body.message.chat.id, `${name} is now being monitored at a threshold of ${threshold}`)
         } else {
           replyTo(request.body.message.chat.id, `${name} is already being monitored at a threshold of ${threshold}`)
         }
       } else {
         watchList.push({ name, threshold: parseFloat(threshold), stopper: monitor(name, parseFloat(threshold)) })
+        applyUpdatingState()
         replyTo(request.body.message.chat.id, `${name} is now being monitored at a threshold of ${threshold}`)
       }
     } else if (request.body?.message?.text?.startsWith('/remove ')) {
