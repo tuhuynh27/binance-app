@@ -1,13 +1,13 @@
 const WebSocket = require('ws')
-const fetch = require('node-fetch');
+const fetch = require('node-fetch')
 const fastify = require('fastify')({
 })
 require('dotenv').config()
 
-const telegramBotKey = process.env.TELEGRAM_PC_BOT_KEY;
-const channelChatId = process.env.TELEGRAM_PC_CHAT_ID;
+const telegramBotKey = process.env.TELEGRAM_PC_BOT_KEY
+const channelChatId = process.env.TELEGRAM_PC_CHAT_ID
 
-const uri = `https://api.telegram.org/bot${telegramBotKey}`;
+const uri = `https://api.telegram.org/bot${telegramBotKey}`
 
 function notify(text) {
   fetch(`${uri}/sendMessage`, {
@@ -26,11 +26,11 @@ function notify(text) {
         logError(`${d['error_code']}, ${d.description}`)
       }
     })
-    .catch(e => logError(e));
+    .catch(e => logError(e))
 }
 
 function logError(e) {
-  console.error("ERROR: " + e.toString());
+  console.error("ERROR: " + e.toString())
 }
 
 function replyTo(chatId, text) {
@@ -45,7 +45,7 @@ function replyTo(chatId, text) {
       parse_mode: "html",
       disable_web_page_preview: true,
     })
-  }).catch(e => logError(e));
+  }).catch(e => logError(e))
 }
 
 function monitor(e = 'BTC', threshold = 1) {
@@ -68,11 +68,11 @@ function monitor(e = 'BTC', threshold = 1) {
     })
 
     socket.onerror = function(err) {
-      logError(err);
+      logError(err)
     }
 
     socket.onclose = function (err) {
-      logError(err);
+      logError(err)
       setTimeout(() => connect(), 0)
     }
   }
@@ -145,12 +145,12 @@ let watchList = [
 
 // Start
 function main() {
-  notify('Hello World')
+  notify('New deployment has been made')
 
   watchList = watchList.map(e => ({
     ...e,
     stopper: monitor(e.name, e.threshold)
-  }));
+  }))
 
   // Declare a route
   fastify.post('/', async function (request, reply) {
@@ -159,7 +159,7 @@ function main() {
       if (!threshold || threshold <= 0) {
         replyTo(request.body.message.chat.id, `Threshold must be positive`)
         reply.send()
-        return;
+        return
       }
 
       const foundAt = watchList.findIndex(e => e.name === name)
@@ -174,7 +174,7 @@ function main() {
           replyTo(request.body.message.chat.id, `${name} is already being monitored at a threshold of ${threshold}`)
         }
       } else {
-        watchList.push({ name, threshold: parseFloat(threshold), stopper: monitor(name, parseFloat(threshold)) });
+        watchList.push({ name, threshold: parseFloat(threshold), stopper: monitor(name, parseFloat(threshold)) })
         replyTo(request.body.message.chat.id, `${name} is now being monitored at a threshold of ${threshold}`)
       }
     } else if (request.body?.message?.text?.startsWith('/remove ')) {
@@ -191,7 +191,7 @@ function main() {
       }
     } else if (request.body?.message?.text?.startsWith('/list')) {
       const msg = watchList.map(e => `${e.name} is being monitored at a threshold of ${e.threshold}`).join('\n')
-      replyTo(request.body.message.chat.id, msg);
+      replyTo(request.body.message.chat.id, msg)
     }
     reply.send()
   })
