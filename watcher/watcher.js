@@ -168,7 +168,8 @@ function main() {
   // Declare a route
   fastify.post('/', async function (request, reply) {
     if (request.body?.message?.text?.startsWith('/add ')) {
-      const [, name, threshold] = request.body.message.text.split(' ')
+      let [, name, threshold] = request.body.message.text.split(' ')
+      name = name.toUpperCase()
       if (!threshold || threshold <= 0) {
         replyTo(request.body.message.chat.id, `Threshold must be positive`)
         reply.send()
@@ -193,7 +194,8 @@ function main() {
         replyTo(request.body.message.chat.id, `${name} is now being monitored at a threshold of ${threshold}`)
       }
     } else if (request.body?.message?.text?.startsWith('/remove ')) {
-      const [, name] = request.body.message.text.split(' ')
+      let [, name] = request.body.message.text.split(' ')
+      name = name.toUpperCase()
 
       const foundAt = watchList.findIndex(e => e.name === name)
 
