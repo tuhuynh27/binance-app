@@ -20,6 +20,12 @@ function WatchTable() {
   const [isAdding, setIsAdding] = useState(false)
   const [newPair, setNewPair] = useState(null)
 
+  const [titleIndex, setTitleIndex] = useState(0);
+
+  window.setTitleIndex = function(index) {
+    setTitleIndex(index)
+  }
+
   const columns = [
     {
       title: 'Name',
@@ -46,9 +52,14 @@ function WatchTable() {
     {
       title: 'PNL (%)',
       render: (_, record) => {
+        const idx = tableData.findIndex(e => e.stream === record.stream)
         const pickedList = listHold.filter(e => e.pair === record.pair)
-        const list = pickedList.map(picked => {
+        const list = pickedList.map((picked, i) => {
           const value = (record.price / picked.price * 100 - 100).toFixed(2)
+          const mValue = ((picked.price * picked.amount) * ((record.price / picked.price * 100 - 100) / 100)).toFixed(2)
+          if (idx === titleIndex && i === 0) {
+            document.title = `${record.pair}: ${value}% ${mValue}$`
+          }
           return (
             <div style={{ fontWeight: 'bold', color: value >= 0 ? 'green' : 'red' }} key={picked.price.toString() + picked.amount.toString()}>
               {value}%

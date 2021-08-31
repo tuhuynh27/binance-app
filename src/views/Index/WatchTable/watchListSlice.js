@@ -61,6 +61,10 @@ export const watchListSlice = createSlice({
         }
         state.tableData.push(newItem)
       } else {
+        // const idx = state.tableData.findIndex(e => e.stream === stream)
+        // if (idx === 0) {
+        //   document.title = price
+        // }
         existedItem.price = price
       }
     },
