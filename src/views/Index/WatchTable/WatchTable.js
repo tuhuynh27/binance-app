@@ -32,7 +32,8 @@ function WatchTable() {
       dataIndex: 'pair',
       key: 'pair',
       render: (_, record) => (
-        <a href={`https://www.binance.com/en/trade/${record.pair}_USDT?type=spot`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
+        // https://www.huobi.com/en-us/exchange/btc_usdt/
+        <a href={`https://www.huobi.com/en-us/exchange/${record.pair.toLowerCase()}_usdt/`} target="_blank" rel="noreferrer" style={{ color: 'black' }}>
           <span style={{ fontWeight: 400, fontSize: '18px' }}>{record.pair}</span>
         </a>
       ),
