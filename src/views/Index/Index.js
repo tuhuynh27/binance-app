@@ -7,11 +7,13 @@ import HoldTable from './HoldTable/HoldTable'
 import { Button, Input, Divider, Modal, Alert, Space } from 'antd'
 import { ShareAltOutlined } from '@ant-design/icons'
 
-import { makeHashParams, isUsingHash } from 'utils/hashParams'
+import { makeHashParams, isUsingHash, getHashParams } from 'utils/hashParams'
 
 import { useSelector } from 'react-redux'
 import { selectListWatch } from './WatchTable/watchListSlice'
 import { selectListHold } from './HoldTable/holdListSlice'
+
+import * as persistence from 'utils/persistence'
 
 function Index() {
   const [shareToggle, setShareToggle] = useState(false)
@@ -38,6 +40,15 @@ function Index() {
     window.location.href = window.location.origin
   }
 
+  function applyChanges() {
+    const hashData = getHashParams()
+    const { listWatch, listHold } = hashData
+    persistence.set('binance_listWatch', listWatch)
+    persistence.set('binance_listHold', listHold)
+    window.history.replaceState(null, null, ' ')
+    window.location.reload()
+  }
+
   return (
     <React.Fragment>
       <Modal title="Share your list" visible={shareToggle}
@@ -62,6 +73,7 @@ function Index() {
         <div className="index-header">
           {!isUsingHash.check && <Button size="large" icon={<ShareAltOutlined />} onClick={shareYourList}>Share your list</Button>}
           {isUsingHash.check && <Button size="large" onClick={createYourList}>Create your own list</Button>}
+          {isUsingHash.check && <Button size="large" type="primary" onClick={applyChanges} style={{ marginLeft: '1rem' }}>Apply this list</Button>}
         </div>
         <h1>Watch List</h1>
         <WatchTable/>
